@@ -1,30 +1,18 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import { pretendard } from "@/styles/font";
 
-import "@workspace/ui/globals.css"
-import { Providers } from "@/components/providers"
-
-const fontSans = Geist({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
+import "@workspace/ui/globals.css";
+import { Providers } from "@/components/providers";
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
-      >
+    <html lang="ko" suppressHydrationWarning>
+      <body className={`${pretendard.variable} font-sans antialiased `}>
         <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }
