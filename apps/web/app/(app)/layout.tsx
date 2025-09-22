@@ -1,13 +1,10 @@
-import { SignOutButton } from "@clerk/nextjs";
+import { NavBar } from "@/components/navbar";
 
 export default function Page({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <header>
-        header content
-        <SignOutButton />
-      </header>
-      <div>{children}</div>
+    <div className="flex flex-col">
+      <NavBar />
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
