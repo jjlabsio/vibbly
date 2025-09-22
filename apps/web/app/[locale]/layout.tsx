@@ -3,8 +3,9 @@ import { pretendard } from "@/styles/font";
 import "@workspace/ui/globals.css";
 import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { NextIntlClientProvider } from "next-intl";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -13,7 +14,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="ko" suppressHydrationWarning>
         <body className={`${pretendard.variable} font-sans antialiased `}>
-          <Providers>{children}</Providers>
+          <NextIntlClientProvider>
+            <Providers>{children}</Providers>
+          </NextIntlClientProvider>
         </body>
       </html>
     </ClerkProvider>
