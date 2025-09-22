@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MainNav } from "./main-nav";
 import { LocaleChange } from "./locale-change";
 import { NavUser } from "./nav-user";
+import { ModeToggle } from "./mode-toggle";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -52,6 +53,8 @@ export async function NavBar() {
           ) : null}
 
           <LocaleChange />
+
+          <ModeToggle />
 
           <NavUser user={safeUser} />
         </div>
