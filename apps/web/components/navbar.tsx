@@ -37,7 +37,7 @@ export async function NavBar() {
   };
 
   return (
-    <header className="flex w-full justify-center bg-background/60">
+    <header className="sticky top-0 flex w-full justify-center backdrop-blur-lg bg-background/60">
       <div className="container flex h-16 items-center justify-between py-4">
         <MainNav />
 
