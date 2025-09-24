@@ -1,12 +1,14 @@
-# shadcn/ui monorepo template
+# Vibbly
 
-This template is for creating a monorepo with shadcn/ui.
+## Todo
 
-## Usage
-
-```bash
-pnpm dlx shadcn@latest init
-```
+- refactor: package name prefix: workspace -> repo
+- feat: 사이드바 추가 및 기본 메뉴 설정
+- feat: 계정 등록 기능 구현 (auth page)
+- feat: 스팸 댓글 감지 및 필터링
+- feat: 대시보드 구현 (dashboard page)
+- feat: 알림 시스템 구현
+- feat: 프리미엄 결제 구현 (stripe)
 
 ## Adding components
 
@@ -21,11 +23,3 @@ This will place the ui components in the `packages/ui/src/components` directory.
 ## Tailwind
 
 Your `tailwind.config.ts` and `globals.css` are already set up to use the components from the `ui` package.
-
-## Using components
-
-To use the components in your app, import them from the `ui` package.
-
-```tsx
-import { Button } from "@workspace/ui/components/button"
-```
