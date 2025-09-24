@@ -1,16 +1,16 @@
 "use client";
 
 import * as React from "react";
-import * as Icons from "@workspace/ui/components/icons";
+import * as Icons from "@vibbly/ui/components/icons";
 import { useTheme } from "next-themes";
 
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@vibbly/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
+} from "@vibbly/ui/components/dropdown-menu";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();

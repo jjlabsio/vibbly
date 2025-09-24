@@ -19,7 +19,17 @@ export default async function Page({
 
   console.log("data :>> ", data);
 
-  const list = data.items as { etag: string; snippet: any }[];
+  const list = data.items as {
+    etag: string;
+    snippet: {
+      topLevelComment: {
+        snippet: {
+          publishedAt: string;
+          textOriginal: string;
+        };
+      };
+    };
+  }[];
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");

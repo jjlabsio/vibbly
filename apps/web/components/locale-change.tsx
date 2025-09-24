@@ -2,14 +2,14 @@
 
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@vibbly/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
-import * as Icons from "@workspace/ui/components/icons";
+} from "@vibbly/ui/components/dropdown-menu";
+import * as Icons from "@vibbly/ui/components/icons";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useTransition } from "react";
@@ -17,7 +17,7 @@ import { useTransition } from "react";
 export function LocaleChange() {
   const t = useTranslations("LocaleSwitcher");
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const pathname = usePathname();
   const params = useParams();
 

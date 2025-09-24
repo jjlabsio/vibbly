@@ -1,19 +1,19 @@
-import * as Icons from "@workspace/ui/components/icons";
+import * as Icons from "@vibbly/ui/components/icons";
 
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@workspace/ui/components/avatar";
+} from "@vibbly/ui/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
+  // DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
+} from "@vibbly/ui/components/dropdown-menu";
 import { SignOutButton } from "@clerk/nextjs";
 
 interface NavUserProps {

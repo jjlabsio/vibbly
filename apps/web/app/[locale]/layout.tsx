@@ -1,6 +1,6 @@
 import { pretendard } from "@/styles/font";
 
-import "@workspace/ui/globals.css";
+import "@vibbly/ui/globals.css";
 import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
