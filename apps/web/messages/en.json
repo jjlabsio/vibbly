@@ -2,7 +2,14 @@
   "LocaleSwitcher": {
     "locale": "{locale, select, ko {한국어} en {English} other {Unknown}}"
   },
-  "HomePage": {
-    "title": "Hello world!"
+  "Sidebar": {
+    "snsCategory": "SNS Management",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "accountCategory": "Account Management",
+    "planUpgrade": "Plan Upgrade"
+  },
+  "Dashboard": {
+    "title": "Dashboard"
   }
 }

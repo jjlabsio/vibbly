@@ -2,7 +2,20 @@
   "LocaleSwitcher": {
     "locale": "{locale, select, ko {한국어} en {English} other {Unknown}}"
   },
-  "HomePage": {
-    "title": "안녕하세요!"
+  "Sidebar": {
+    "snsCategory": "SNS관리",
+    "dashboard": "대시보드",
+    "settings": "설정",
+    "accountCategory": "계정관리",
+    "planUpgrade": "플랜 업그레이드"
+  },
+  "Dashboard": {
+    "title": "대시보드"
+  },
+  "Settings": {
+    "title": ""
+  },
+  "Upgrade": {
+    "title": ""
   }
 }

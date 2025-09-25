@@ -16,14 +16,14 @@ import {
 } from "@vibbly/ui/components/dropdown-menu";
 import { SignOutButton } from "@clerk/nextjs";
 
-interface NavUserProps {
+interface HeaderUserProps {
   user: {
     email: string;
     avatar: string;
   };
 }
 
-export const NavUser: React.FC<NavUserProps> = ({ user }) => {
+export const HeaderUser = ({ user }: HeaderUserProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

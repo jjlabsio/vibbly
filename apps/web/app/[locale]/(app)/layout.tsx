@@ -1,26 +1,23 @@
-import { NavBar } from "@/components/navbar";
-import { routing } from "@/i18n/routing";
-import { hasLocale } from "next-intl";
-import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Header } from "@/components/header";
+import { SidebarInset, SidebarProvider } from "@vibbly/ui/components/sidebar";
 
-interface Props {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}
-
-export default async function Page({ children, params }: Props) {
-  const { locale } = await params;
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
-  const t = await getTranslations("HomePage");
+export default function Page({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col">
-      <NavBar />
-      <main className="flex-1">{children}</main>
-      <div>{t("title")}</div>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <Header />
+        <div className="p-6">{children}</div>
+        {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="bg-muted/50 aspect-video rounded-xl" />
+            <div className="bg-muted/50 aspect-video rounded-xl" />
+            <div className="bg-muted/50 aspect-video rounded-xl" />
+          </div>
+          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+        </div> */}
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
