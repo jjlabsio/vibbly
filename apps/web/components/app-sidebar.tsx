@@ -1,23 +1,25 @@
 "use client";
 
 import * as React from "react";
-import { ChartArea, Settings, Gem } from "lucide-react";
+import * as Icons from "@vibbly/ui/components/icons";
 
 import { NavBlock } from "@/components/nav-block";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@vibbly/ui/components/sidebar";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("Sidebar");
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const snsMenu = {
     category: t("snsCategory"),
@@ -25,12 +27,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         name: t("dashboard"),
         url: "/dashboard",
-        icon: ChartArea,
+        icon: Icons.ChartArea,
       },
       {
         name: t("settings"),
         url: "/settings",
-        icon: Settings,
+        icon: Icons.Settings,
       },
     ],
   };
@@ -41,19 +43,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         name: t("planUpgrade"),
         url: "/upgrade",
-        icon: Gem,
+        icon: Icons.Gem,
       },
     ],
   };
 
   return (
-    <Sidebar collapsible="none" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="p-2">
-              <Image src="/logo.png" alt="vibbly logo" width={90} height={32} />
-            </div>
+            {isCollapsed ? (
+              <div className="bg-blue-500 size-[32px] flex items-center justify-center font-black text-foreground rounded-md cursor-default">
+                V
+              </div>
+            ) : (
+              <div className="p-2">
+                <Image
+                  src="/logo.png"
+                  alt="vibbly logo"
+                  width={90}
+                  height={32}
+                />
+              </div>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -61,7 +74,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavBlock category={snsMenu.category} items={snsMenu.items} />
         <NavBlock category={accountMenu.category} items={accountMenu.items} />
       </SidebarContent>
-      <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

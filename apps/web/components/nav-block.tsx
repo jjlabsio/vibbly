@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { type LucideIcon } from "lucide-react";
 
 import {
@@ -9,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@vibbly/ui/components/sidebar";
-import { usePathname } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 interface NavBlockProps {
   category: string;
@@ -20,25 +21,42 @@ interface NavBlockProps {
   }[];
 }
 
+function isItemActive(currentPathname: string, itemUrl: string) {
+  if (currentPathname === itemUrl) return true;
+  return currentPathname.startsWith(`${itemUrl}/`);
+}
+
 export function NavBlock({ category, items }: NavBlockProps) {
   const pathname = usePathname();
+  const [mountedPathname, setMountedPathname] = React.useState<string | null>(
+    null
+  );
+
+  React.useEffect(() => {
+    setMountedPathname(pathname);
+  }, [pathname]);
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>{category}</SidebarGroupLabel>
+    <SidebarGroup>
+      <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+        {category}
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton
               asChild
               isActive={
-                pathname === item.url || pathname.startsWith(item.url + "/")
+                mountedPathname
+                  ? isItemActive(mountedPathname, item.url)
+                  : false
               }
+              tooltip={item.name}
             >
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
