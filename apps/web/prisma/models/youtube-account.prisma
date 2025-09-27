@@ -1,0 +1,10 @@
+model YoutubeAccount {
+    channelId    String   @id
+    userId       String
+    accessToken  String
+    refreshToken String
+    //  access_token 만료 시각(ms)
+    expiryDate   BigInt?
+    created_at   DateTime @default(now())
+    updated_at   DateTime @updatedAt
+}

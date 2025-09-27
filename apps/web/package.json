@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:push": "npx prisma db push"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -20,6 +21,7 @@
     "@prisma/extension-accelerate": "^2.0.2",
     "@vibbly/ui": "workspace:*",
     "date-fns": "^4.1.0",
+    "googleapis": "^160.0.0",
     "lucide-react": "^0.475.0",
     "next": "^15.4.5",
     "next-intl": "^4.3.9",

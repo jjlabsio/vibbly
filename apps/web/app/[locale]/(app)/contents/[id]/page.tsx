@@ -1,14 +1,8 @@
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+async function getCommentThreads() {
   const baseUrl = `http://localhost:3000`;
-
-  const { id } = await params;
   const response = await fetch(`${baseUrl}/api/comment-threads`);
 
   if (!response.ok) {
@@ -16,6 +10,17 @@ export default async function Page({
   }
 
   const data = await response.json();
+
+  return data;
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const data = await getCommentThreads();
 
   console.log("data :>> ", data);
 
