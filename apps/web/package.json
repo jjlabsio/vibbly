@@ -19,6 +19,7 @@
     "@clerk/nextjs": "^6.32.0",
     "@prisma/client": "^6.16.2",
     "@prisma/extension-accelerate": "^2.0.2",
+    "@tanstack/react-table": "^8.21.3",
     "@vibbly/ui": "workspace:*",
     "date-fns": "^4.1.0",
     "googleapis": "^160.0.0",

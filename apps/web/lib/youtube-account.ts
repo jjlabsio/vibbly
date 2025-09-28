@@ -1,9 +1,9 @@
 import { google } from "googleapis";
 import db from "@/lib/prisma";
 
-export async function getYouTubeClient(userId: string) {
-  const account = await db.youtubeAccount.findFirst({
-    where: { userId: userId },
+export async function getYouTubeClient(channelId: string) {
+  const account = await db.youtubeAccount.findUnique({
+    where: { channelId },
   });
   if (!account) throw new Error("유튜브 계정 미등록");
 

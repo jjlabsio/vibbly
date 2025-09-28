@@ -1,31 +1,9 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { Button } from "@vibbly/ui/components/button";
 import { getTranslations } from "next-intl/server";
-import { getYouTubeClient } from "@/lib/youtube-account";
-import { DeleteComponent } from "@/components/delete-component";
+import { VideoTable } from "@/components/youtube/video-table";
 
-async function Temp() {
-  const user = await currentUser();
-  if (!user) {
-    throw Error("There is no user");
-  }
-
-  const client = await getYouTubeClient(user.id);
-  const channel = await client.channels.list({
-    mine: true,
-    part: ["id", "snippet"],
-  });
-
-  console.log("channel.data.items :>> ", channel.data.items);
-}
-
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  // await Temp();
-
+export default async function Page() {
   const t = await getTranslations("Dashboard");
 
   const user = await currentUser();
@@ -49,9 +27,9 @@ export default async function Page({
               <a href="/api/youtube/connect">Add Youtube Channel</a>
             </Button>
           </div>
-          <div>table</div>
-
-          <DeleteComponent userId={user.id} />
+          <div>
+            <VideoTable />
+          </div>
         </div>
       </div>
     </div>
