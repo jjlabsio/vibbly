@@ -2,6 +2,29 @@ import { currentUser } from "@clerk/nextjs/server";
 import { Button } from "@vibbly/ui/components/button";
 import { getTranslations } from "next-intl/server";
 import { VideoTable } from "@/components/youtube/video-table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@vibbly/ui/components/card";
+
+interface Channel {
+  id: string;
+  title: string;
+  description: string;
+  profileUrl: string;
+}
+
+async function getChannels(userId: string) {
+  const baseUrl = process.env.SERVICE_BASE_URL ?? "http://localhost:3000";
+  const response = await fetch(`${baseUrl}/api/users/${userId}/channels`, {
+    cache: "no-store",
+  });
+  const data = await response.json();
+
+  return data.data;
+}
 
 export default async function Page() {
   const t = await getTranslations("Dashboard");
@@ -11,17 +34,44 @@ export default async function Page() {
     throw Error("There is no user");
   }
 
+  const channels = (await getChannels(user.id)) as Channel[];
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="text-4xl font-black">{t("title")}</div>
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="bg-muted/50 aspect-video rounded-xl" />
-        <div className="bg-muted/50 aspect-video rounded-xl" />
-        <div className="bg-muted/50 aspect-video rounded-xl" />
+        <Card>
+          <CardHeader>
+            <CardTitle>연동된 채널 개수</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div>{channels.length}개</div>
+            <div>list</div>
+            <div>
+              {channels.map((channel) => (
+                <div key={channel.id}>{channel.title}</div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sample</CardTitle>
+          </CardHeader>
+          <CardContent>content</CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sample</CardTitle>
+          </CardHeader>
+          <CardContent>content</CardContent>
+        </Card>
       </div>
-      <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl">
-        <div>Video List</div>
-        <div className="flex flex-col">
+      <Card className="">
+        <CardHeader>
+          <CardTitle>컨텐츠 목록</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div>
             <Button asChild>
               <a href="/api/youtube/connect">Add Youtube Channel</a>
@@ -30,8 +80,8 @@ export default async function Page() {
           <div>
             <VideoTable />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

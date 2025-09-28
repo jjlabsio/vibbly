@@ -10,7 +10,10 @@ interface Channel {
   profileUrl: string;
 }
 
-export async function GET(req: Request) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ userId: string }> }
+) {
   // Todo
   //     const auth = req.headers.get("Authorization");
   //   if (!auth?.startsWith("Bearer ")) return new Response("Unauthorized", { status: 401 });
@@ -18,11 +21,7 @@ export async function GET(req: Request) {
   //   const token = auth.replace("Bearer ", "");
   //   const payload = verifyJwt(token); // userId 등 decode
   //   const userId = payload.sub;
-
-  const url = new URL(req.url);
-  const userId = url.searchParams.get("userId");
-  if (!userId)
-    return NextResponse.json({ error: "No UserId" }, { status: 400 });
+  const { userId } = await params;
 
   const accounts = await db.youtubeAccount.findMany({
     where: { userId },
