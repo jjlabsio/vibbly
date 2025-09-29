@@ -1,6 +1,14 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { DataTable } from "./data-table";
 import { columns, Content } from "./columns";
+import { api } from "@/lib/api";
+
+interface ContentDto {
+  id: string;
+  title: string;
+  description: string;
+  publishedAt: string;
+}
 
 export async function VideoTable() {
   const user = await currentUser();
@@ -8,21 +16,11 @@ export async function VideoTable() {
     throw Error("There is no user");
   }
 
-  const baseUrl = process.env.SERVICE_BASE_URL ?? "http://localhost:3000";
-  const response = await fetch(`${baseUrl}/api/users/${user.id}/contents`, {
-    cache: "no-store",
-  });
+  const { data: videos } = await api.get<ContentDto[]>(
+    `/api/users/${user.id}/contents`
+  );
 
-  if (!response.ok) {
-    throw Error("Failed to load contents");
-  }
-
-  const payload = await response.json();
-  const rawVideos = Array.isArray(payload?.data)
-    ? (payload.data as Content[])
-    : [];
-
-  const videoList = rawVideos.filter(
+  const videoList = videos.filter(
     (video): video is Content & { id: string } => {
       return Boolean(video?.id);
     }

@@ -62,5 +62,5 @@ export async function GET(
     allContents.push(...videos);
   }
 
-  return NextResponse.json({ data: allContents });
+  return NextResponse.json(allContents);
 }

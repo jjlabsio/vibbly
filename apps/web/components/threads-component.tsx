@@ -1,21 +1,9 @@
-import { notFound } from "next/navigation";
-
-async function getCommentThreads() {
-  const baseUrl = `http://localhost:3000`;
-  const response = await fetch(`${baseUrl}/api/comment-threads`);
-
-  if (!response.ok) {
-    return notFound();
-  }
-
-  const data = await response.json();
-
-  return data;
-}
+import { api } from "@/lib/api";
 
 export const ThreadsComponent = async () => {
-  const data = await getCommentThreads();
-  const list = data.items as {
+  const { data } = await api.get(`/api/comment-threads`);
+
+  const list = data as {
     etag: string;
     snippet: {
       topLevelComment: {

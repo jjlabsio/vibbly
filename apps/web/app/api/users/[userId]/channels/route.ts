@@ -45,5 +45,5 @@ export async function GET(
     result.push(channelData);
   }
 
-  return NextResponse.json({ data: result });
+  return NextResponse.json(result);
 }

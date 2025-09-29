@@ -8,22 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@vibbly/ui/components/card";
+import { api } from "@/lib/api";
 
 interface Channel {
   id: string;
   title: string;
   description: string;
   profileUrl: string;
-}
-
-async function getChannels(userId: string) {
-  const baseUrl = process.env.SERVICE_BASE_URL ?? "http://localhost:3000";
-  const response = await fetch(`${baseUrl}/api/users/${userId}/channels`, {
-    cache: "no-store",
-  });
-  const data = await response.json();
-
-  return data.data;
 }
 
 export default async function Page() {
@@ -34,7 +25,9 @@ export default async function Page() {
     throw Error("There is no user");
   }
 
-  const channels = (await getChannels(user.id)) as Channel[];
+  const { data: channels } = await api.get<Channel[]>(
+    `/api/users/${user.id}/channels`
+  );
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
