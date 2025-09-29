@@ -1,10 +1,36 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
 const initMiddleware = createMiddleware(routing);
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const publicRoutes = ["/sign-in", "/sign-up"];
+
+const isSupportedLocale = (
+  locale?: string
+): locale is (typeof routing.locales)[number] =>
+  !!locale && routing.locales.includes(locale as (typeof routing.locales)[number]);
+
+const normalizePathname = (pathname: string) => {
+  const segments = pathname.split("/").filter(Boolean);
+
+  if (segments.length === 0) {
+    return "/";
+  }
+
+  const [possibleLocale, ...rest] = segments;
+
+  if (isSupportedLocale(possibleLocale)) {
+    return `/${rest.join("/")}` || "/";
+  }
+
+  return pathname;
+};
+
+const isPublicPath = (pathname: string) =>
+  publicRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
 
 export default clerkMiddleware(async (auth, req) => {
   const path = req.nextUrl.pathname;
@@ -14,8 +40,10 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
+  const normalizedPath = normalizePathname(path);
+
   // Protect non-public, non-API routes
-  if (!isPublicRoute(req)) {
+  if (!isPublicPath(normalizedPath)) {
     await auth.protect();
   }
 
