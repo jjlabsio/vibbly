@@ -16,7 +16,6 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.32.0",
     "@prisma/client": "^6.16.2",
     "@prisma/extension-accelerate": "^2.0.2",
     "@tanstack/react-query": "^5.90.2",
@@ -26,6 +25,7 @@
     "googleapis": "^160.0.0",
     "lucide-react": "^0.475.0",
     "next": "^15.4.5",
+    "next-auth": "^4.24.11",
     "next-intl": "^4.3.9",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",

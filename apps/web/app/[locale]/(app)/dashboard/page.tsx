@@ -1,4 +1,3 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { Button } from "@vibbly/ui/components/button";
 import { getTranslations } from "next-intl/server";
 import { VideoTable } from "@/components/youtube/video-table";
@@ -8,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@vibbly/ui/components/card";
-import { api } from "@/lib/api";
 
 interface Channel {
   id: string;
@@ -20,14 +18,10 @@ interface Channel {
 export default async function Page() {
   const t = await getTranslations("Dashboard");
 
-  const user = await currentUser();
-  if (!user) {
-    throw Error("There is no user");
-  }
-
-  const { data: channels } = await api.get<Channel[]>(
-    `/api/users/${user.id}/channels`
-  );
+  // const { data: channels } = await api.get<Channel[]>(
+  //   `/api/users/${user.id}/channels`
+  // );
+  const channels: any[] = [];
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

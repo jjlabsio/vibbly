@@ -1,5 +1,6 @@
-import * as Icons from "@vibbly/ui/components/icons";
+"use client";
 
+import * as Icons from "@vibbly/ui/components/icons";
 import {
   Avatar,
   AvatarFallback,
@@ -8,22 +9,23 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  // DropdownMenuGroup,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@vibbly/ui/components/dropdown-menu";
-import { SignOutButton } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 
-interface HeaderUserProps {
-  user: {
-    email: string;
-    avatar: string;
+export const HeaderUser = () => {
+  const { data: session } = useSession();
+
+  const user = {
+    name: session?.user?.name ?? "",
+    email: session?.user?.email ?? "",
+    avatar: "",
   };
-}
 
-export const HeaderUser = ({ user }: HeaderUserProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,26 +43,22 @@ export const HeaderUser = ({ user }: HeaderUserProps) => {
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.email}</span>
-              {/* <span className="truncate text-xs">{user.email}</span> */}
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="truncate text-xs">{user.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {/* <DropdownMenuGroup>
+        <DropdownMenuGroup>
           <DropdownMenuItem>
             <Icons.Bell />
             Notifications
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator /> */}
+        <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <SignOutButton>
-            <div className="flex items-center gap-2">
-              <Icons.LogOut />
-              Log out
-            </div>
-          </SignOutButton>
+          <Icons.LogOut />
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
