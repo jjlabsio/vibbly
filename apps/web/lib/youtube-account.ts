@@ -6,7 +6,11 @@ export async function getYouTubeClient(channelId: string) {
   const account = await db.youtubeAccount.findUnique({
     where: { channelId },
   });
-  if (!account) throw new Error("유튜브 계정 미등록");
+  if (!account) {
+    throw new Error(
+      "channelId에 대항하는 계정이 데이터베이스에 존재하지 않습니다"
+    );
+  }
 
   const oauth2Client = getOauth2Client();
 

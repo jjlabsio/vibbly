@@ -1,4 +1,3 @@
-import { Button } from "@vibbly/ui/components/button";
 import { getTranslations } from "next-intl/server";
 import { VideoTable } from "@/components/youtube/video-table";
 import {
@@ -7,10 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@vibbly/ui/components/card";
-import { api } from "@/lib/api-backup";
-import { auth } from "@/auth";
 import { getMyChannels } from "@/lib/youtube/me";
-import { cookies } from "next/headers";
 import { YoutubeAccount } from "@/components/youtube-account";
 
 interface Channel {
@@ -66,7 +62,6 @@ export default async function Page() {
         </CardHeader>
         <CardContent>
           <div>
-            {/* <Button onClick={oauthAccount}>Add Youtube Channel</Button> */}
             <YoutubeAccount />
           </div>
           <div>

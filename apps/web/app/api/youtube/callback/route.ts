@@ -7,7 +7,6 @@ import { getOauth2Client } from "@/lib/oauth";
 export async function GET(req: NextRequest) {
   const session = await auth();
   const email = session?.user?.email;
-  console.log("email :>> ", email);
   if (!email) return NextResponse.json({ error: "Not Auth" }, { status: 401 });
 
   const user = await db.user.findUnique({

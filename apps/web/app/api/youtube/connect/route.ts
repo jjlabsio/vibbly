@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getOauth2Client } from "@/lib/oauth";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const oauth2Client = getOauth2Client();
 
   const scopes = [

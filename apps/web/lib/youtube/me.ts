@@ -14,14 +14,14 @@ export const getMyChannels = async () => {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      throw Error("No session");
+      throw Error("session.user.email 데이터가 존재하지 않습니다");
     }
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
     if (!user) {
-      throw Error("No user data matched with email");
+      throw Error("user가 데이터베이스에 존재하지 않습니다");
     }
 
     const dbAccounts = await prisma.youtubeAccount.findMany({
