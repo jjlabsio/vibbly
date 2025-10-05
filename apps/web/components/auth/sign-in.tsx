@@ -1,12 +1,15 @@
-"use client";
-
+import { signIn } from "@/auth";
 import { Button } from "@vibbly/ui/components/button";
-import { signIn } from "next-auth/react";
 
-export default function SignInButton({ provider }: { provider: any }) {
+export function SignIn() {
   return (
-    <Button onClick={() => signIn(provider.id)}>
-      Sign in with {provider.name}
-    </Button>
+    <form
+      action={async () => {
+        "use server";
+        await signIn("google", { redirectTo: "/dashboard" });
+      }}
+    >
+      <Button type="submit">Sign in with Google</Button>
+    </form>
   );
 }

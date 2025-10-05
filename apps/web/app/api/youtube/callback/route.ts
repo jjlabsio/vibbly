@@ -1,21 +1,31 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
-import { currentUser } from "@clerk/nextjs/server";
 import db from "@/lib/prisma";
+import { auth } from "@/auth";
 
-export async function GET(req: Request) {
-  const user = await currentUser();
-  const userId = user?.id;
-  if (!userId) return NextResponse.json({ error: "Not Auth" }, { status: 401 });
+export async function GET(req: NextRequest) {
+  const session = await auth();
+  const email = session?.user?.email;
+  console.log("email :>> ", email);
+  if (!email) return NextResponse.json({ error: "Not Auth" }, { status: 401 });
+
+  const user = await db.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user)
+    return NextResponse.json({ error: "User Not Found" }, { status: 404 });
 
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
   if (!code) return NextResponse.json({ error: "No code" }, { status: 400 });
 
   const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    process.env.AUTH_GOOGLE_ID,
+    process.env.AUTH_GOOGLE_SECRET,
+    process.env.AUTH_GOOGLE_REDIRECT_URI
   );
 
   const { tokens } = await oauth2Client.getToken(code);
@@ -36,13 +46,13 @@ export async function GET(req: Request) {
   await db.youtubeAccount.create({
     data: {
       channelId: channelId,
-      userId: userId,
+      userId: user.id,
       accessToken: tokens.access_token!,
       refreshToken: tokens.refresh_token!,
       expiryDate: tokens.expiry_date ?? null,
     },
   });
 
-  const baseUrl = process.env.SERVICE_BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   return NextResponse.redirect(`${baseUrl}/dashboard`);
 }

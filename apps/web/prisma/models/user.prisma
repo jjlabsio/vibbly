@@ -1,5 +1,25 @@
 model User {
-    id    Int    @id @default(autoincrement())
-    email String @unique
-    name  String
+    id           String        @id @default(cuid())
+    email        String        @unique
+    name         String
+    image        String
+    createdAt    DateTime      @default(now()) @map("created_at")
+    updatedAt    DateTime      @updatedAt @map("updated_at")
+    authAccounts AuthAccount[]
+
+    @@map("users")
+}
+
+enum Provider {
+    google
+}
+
+model AuthAccount {
+    id       String   @id @default(cuid())
+    user     User     @relation(fields: [userId], references: [id])
+    userId   String   @map("user_id")
+    provider Provider
+
+    @@unique([userId, provider])
+    @@map("auth_accounts")
 }

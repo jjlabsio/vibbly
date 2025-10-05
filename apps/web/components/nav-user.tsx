@@ -1,5 +1,3 @@
-"use client";
-
 import * as Icons from "@vibbly/ui/components/icons";
 import {
   Avatar,
@@ -15,23 +13,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@vibbly/ui/components/dropdown-menu";
-import { useSession } from "next-auth/react";
+import { SignOut } from "./auth/sign-out";
+import { auth } from "@/auth";
 
-export const HeaderUser = () => {
-  const { data: session } = useSession();
+export const HeaderUser = async () => {
+  const session = await auth();
+
+  if (!session) {
+    return null;
+  }
 
   const user = {
-    name: session?.user?.name ?? "",
+    name: session.user?.name ?? "",
     email: session?.user?.email ?? "",
-    avatar: "",
+    avatar: session.user?.image ?? undefined,
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="h-8 w-8 rounded-lg">
-          <AvatarImage src={user.avatar} alt="user avatar" />
-          <AvatarFallback className="rounded-lg">User</AvatarFallback>
+          <AvatarImage alt="user avatar" />
+          <AvatarFallback className="rounded-lg">
+            {user.name.length > 1 ? user.name[0] : user.name}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -57,8 +62,9 @@ export const HeaderUser = () => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <Icons.LogOut />
-          Log out
+          {/* <Icons.LogOut />
+          Log out */}
+          <SignOut />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,10 +1,12 @@
 model YoutubeAccount {
-    channelId    String   @id
-    userId       String
-    accessToken  String
-    refreshToken String
+    channelId    String   @id @map("channel_id")
+    userId       String   @map("user_id")
+    accessToken  String   @map("access_token")
+    refreshToken String   @map("refresh_token")
     //  access_token 만료 시각(ms)
-    expiryDate   BigInt?
-    created_at   DateTime @default(now())
-    updated_at   DateTime @updatedAt
+    expiryDate   BigInt?  @map("expiry_date")
+    createdAt    DateTime @default(now()) @map("created_at")
+    updatedAt    DateTime @updatedAt @map("updated_at")
+
+    @@map("youtube_accounts")
 }

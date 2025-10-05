@@ -1,14 +1,21 @@
-import { Button } from "@vibbly/ui/components/button";
+import { auth } from "@/auth";
+import { SignOut } from "@/components/auth/sign-out";
 import Link from "next/link";
 
-export default function Page() {
+export default async function Page() {
+  const session = await auth();
+
   return (
-    <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hello World</h1>
-        <Button size="sm">Button</Button>
-        <Link href="/sign-in">Sign In</Link>
+    <div className="h-screen flex flex-col gap-4 items-center justify-center">
+      <div>
+        <div>
+          {session
+            ? `session : ${JSON.stringify(session, null, 2)}`
+            : "no session"}
+        </div>
       </div>
+      <Link href="/sign-in">sign in</Link>
+      <SignOut />
     </div>
   );
 }

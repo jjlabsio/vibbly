@@ -72,12 +72,23 @@ export class ApiClient {
   }
 
   private buildRequestOptions(options: RequestInit): RequestInit {
+    const headers = new Headers(this.config.defaultHeaders);
+
+    if (options.headers) {
+      const requestHeaders = new Headers(options.headers as HeadersInit);
+      requestHeaders.forEach((value, key) => {
+        headers.set(key, value);
+      });
+    }
+
+    const body = options.body;
+    if (this.isFormData(body)) {
+      headers.delete("Content-Type");
+    }
+
     return {
       ...options,
-      headers: {
-        ...this.config.defaultHeaders,
-        ...options.headers,
-      },
+      headers: Object.fromEntries(headers.entries()),
     };
   }
 
@@ -111,7 +122,7 @@ export class ApiClient {
     return this.makeRequest<T>(endpoint, {
       ...options,
       method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
+      body: this.prepareBody(data),
     });
   }
 
@@ -123,7 +134,7 @@ export class ApiClient {
     return this.makeRequest<T>(endpoint, {
       ...options,
       method: "PUT",
-      body: data ? JSON.stringify(data) : undefined,
+      body: this.prepareBody(data),
     });
   }
 
@@ -142,7 +153,45 @@ export class ApiClient {
     return this.makeRequest<T>(endpoint, {
       ...options,
       method: "PATCH",
-      body: data ? JSON.stringify(data) : undefined,
+      body: this.prepareBody(data),
     });
+  }
+
+  private prepareBody(data: unknown): BodyInit | undefined {
+    if (data === undefined || data === null) {
+      return undefined;
+    }
+
+    if (this.isFormData(data)) {
+      return data;
+    }
+
+    if (
+      typeof Blob !== "undefined" && data instanceof Blob
+    ) {
+      return data;
+    }
+
+    if (
+      typeof ArrayBuffer !== "undefined" && data instanceof ArrayBuffer
+    ) {
+      return data;
+    }
+
+    if (data instanceof URLSearchParams) {
+      return data;
+    }
+
+    if (typeof data === "string" || data instanceof String) {
+      return data.toString();
+    }
+
+    return JSON.stringify(data);
+  }
+
+  private isFormData(
+    body: unknown
+  ): body is FormData {
+    return typeof FormData !== "undefined" && body instanceof FormData;
   }
 }

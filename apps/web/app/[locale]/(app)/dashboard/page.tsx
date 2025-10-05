@@ -7,6 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@vibbly/ui/components/card";
+import { api } from "@/lib/api-backup";
+import { auth } from "@/auth";
+import { getMyChannels } from "@/lib/youtube/me";
+import { cookies } from "next/headers";
+import { YoutubeAccount } from "@/components/youtube-account";
 
 interface Channel {
   id: string;
@@ -18,29 +23,30 @@ interface Channel {
 export default async function Page() {
   const t = await getTranslations("Dashboard");
 
-  // const { data: channels } = await api.get<Channel[]>(
-  //   `/api/users/${user.id}/channels`
-  // );
-  const channels: any[] = [];
+  const channels = await getMyChannels();
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="text-4xl font-black">{t("title")}</div>
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>연동된 채널 개수</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div>{channels.length}개</div>
-            <div>list</div>
-            <div>
-              {channels.map((channel) => (
-                <div key={channel.id}>{channel.title}</div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {channels ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>연동된 채널 개수</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>{channels.length}개</div>
+              <div>list</div>
+              <div>
+                {channels.map((channel) => (
+                  <div key={channel.id}>{channel.title}</div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div>data를 가져올 수 없습니다.</div>
+        )}
         <Card>
           <CardHeader>
             <CardTitle>Sample</CardTitle>
@@ -60,9 +66,8 @@ export default async function Page() {
         </CardHeader>
         <CardContent>
           <div>
-            <Button asChild>
-              <a href="/api/youtube/connect">Add Youtube Channel</a>
-            </Button>
+            {/* <Button onClick={oauthAccount}>Add Youtube Channel</Button> */}
+            <YoutubeAccount />
           </div>
           <div>
             <VideoTable />
