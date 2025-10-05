@@ -18,11 +18,11 @@ export default async function Page() {
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="text-4xl font-black">{t("title")}</div>
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        {channels ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>연동된 채널 개수</CardTitle>
-            </CardHeader>
+        <Card>
+          <CardHeader>
+            <CardTitle>연동된 채널 개수</CardTitle>
+          </CardHeader>
+          {channels ? (
             <CardContent>
               <div>{channels.length}개</div>
               <div>list</div>
@@ -32,16 +32,18 @@ export default async function Page() {
                 ))}
               </div>
             </CardContent>
-          </Card>
-        ) : (
-          <div>data를 가져올 수 없습니다.</div>
-        )}
+          ) : (
+            <div>data를 가져올 수 없습니다.</div>
+          )}
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Sample</CardTitle>
           </CardHeader>
           <CardContent>content</CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Sample</CardTitle>
