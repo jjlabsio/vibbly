@@ -1,7 +1,6 @@
 {
   "extends": "@vibbly/typescript-config/nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
       "@vibbly/ui/*": ["../../packages/ui/src/*"]
