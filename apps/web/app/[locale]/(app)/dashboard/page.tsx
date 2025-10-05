@@ -9,13 +9,6 @@ import {
 import { getMyChannels } from "@/lib/youtube/me";
 import { YoutubeAccount } from "@/components/youtube-account";
 
-interface Channel {
-  id: string;
-  title: string;
-  description: string;
-  profileUrl: string;
-}
-
 export default async function Page() {
   const t = await getTranslations("Dashboard");
 

@@ -1,17 +1,7 @@
 import NextAuth, { NextAuthResult } from "next-auth";
 import Google from "next-auth/providers/google";
 import { serverApi } from "./lib/api";
-import { Prisma } from "./generated/prisma";
-
-// UserModel로 대체해야되는데 타입이 생성이 안되서 임시로 사용
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Prisma, User } from "./generated/prisma";
 
 export const nextAuth = NextAuth({
   providers: [
