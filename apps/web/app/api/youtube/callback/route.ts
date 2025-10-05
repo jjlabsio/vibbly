@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import db from "@/lib/prisma";
 import { auth } from "@/auth";
+import { getOauth2Client } from "@/lib/oauth";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -22,11 +23,7 @@ export async function GET(req: NextRequest) {
   const code = url.searchParams.get("code");
   if (!code) return NextResponse.json({ error: "No code" }, { status: 400 });
 
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.AUTH_GOOGLE_ID,
-    process.env.AUTH_GOOGLE_SECRET,
-    process.env.AUTH_GOOGLE_REDIRECT_URI
-  );
+  const oauth2Client = getOauth2Client();
 
   const { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);

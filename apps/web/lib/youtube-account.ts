@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import db from "@/lib/prisma";
+import { getOauth2Client } from "./oauth";
 
 export async function getYouTubeClient(channelId: string) {
   const account = await db.youtubeAccount.findUnique({
@@ -7,11 +8,7 @@ export async function getYouTubeClient(channelId: string) {
   });
   if (!account) throw new Error("유튜브 계정 미등록");
 
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.AUTH_GOOGLE_ID,
-    process.env.AUTH_GOOGLE_SECRET,
-    process.env.AUTH_GOOGLE_REDIRECT_URI
-  );
+  const oauth2Client = getOauth2Client();
 
   oauth2Client.setCredentials({
     access_token: account.accessToken,
