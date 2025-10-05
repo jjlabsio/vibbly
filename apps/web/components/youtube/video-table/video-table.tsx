@@ -1,20 +1,9 @@
 import { DataTable } from "./data-table";
 import { columns, Content } from "./columns";
-import { api } from "@/lib/api";
-
-interface ContentDto {
-  id: string;
-  title: string;
-  description: string;
-  publishedAt: string;
-}
+import { getMyVideos } from "@/lib/youtube/me";
 
 export async function VideoTable() {
-  // const { data: videos } = await api.get<ContentDto[]>(
-  //   `/api/users/${user.id}/contents`
-  // );
-
-  const videos: any[] = [];
+  const videos = await getMyVideos();
 
   const videoList = videos.filter(
     (video): video is Content & { id: string } => {

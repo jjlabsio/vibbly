@@ -34,8 +34,7 @@ const schema = zfd.formData({
 });
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const dataParse = schema.safeParse(formData);
+  const dataParse = schema.safeParse(await req.formData());
 
   if (!dataParse.success) {
     return Response.json(

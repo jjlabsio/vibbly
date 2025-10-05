@@ -51,3 +51,75 @@ export const getMyChannels = async () => {
     return null;
   }
 };
+
+function isTruthy<T>(value: T | null | undefined): value is T {
+  return Boolean(value);
+}
+
+interface Content {
+  id: string;
+  title: string;
+  description: string;
+  publishedAt: string;
+}
+
+export const getMyVideos = async (): Promise<Content[]> => {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      throw Error("session.user.email 데이터가 존재하지 않습니다");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+    if (!user) {
+      throw Error("user가 데이터베이스에 존재하지 않습니다");
+    }
+
+    const dbAccounts = await prisma.youtubeAccount.findMany({
+      where: { userId: user.id },
+    });
+    const allContents: Content[] = [];
+
+    for (const account of dbAccounts) {
+      const client = await getYouTubeClient(account.channelId);
+      const channelList = await client.channels.list({
+        part: ["contentDetails"],
+        mine: true,
+      });
+      const uploadPlaylist = (channelList.data.items || [])[0]?.contentDetails
+        ?.relatedPlaylists?.uploads;
+
+      const playlistItems = await client.playlistItems.list({
+        part: ["id", "snippet", "contentDetails", "status"],
+        playlistId: uploadPlaylist,
+        maxResults: 50,
+      });
+
+      const publicVideos = (playlistItems.data.items ?? []).filter(
+        (video) => video.status?.privacyStatus === "public" && video.id
+      );
+
+      const videos = publicVideos
+        .map((video) => {
+          if (!video.id) return null;
+
+          return {
+            id: video.id,
+            title: video.snippet?.title ?? "",
+            description: video.snippet?.description ?? "",
+            publishedAt: video.snippet?.publishedAt ?? "",
+          };
+        })
+        .filter(isTruthy);
+
+      allContents.push(...videos);
+    }
+
+    return allContents;
+  } catch (error) {
+    console.error("error: >>", error);
+    return [];
+  }
+};
