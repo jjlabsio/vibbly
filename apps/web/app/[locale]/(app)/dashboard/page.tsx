@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { VideoTable } from "@/components/youtube/video-table";
 import {
   Card,
   CardContent,
@@ -58,9 +57,6 @@ export default async function Page() {
         <CardContent>
           <div>
             <YoutubeAccount />
-          </div>
-          <div>
-            <VideoTable />
           </div>
         </CardContent>
       </Card>

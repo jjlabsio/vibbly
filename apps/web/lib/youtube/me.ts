@@ -3,7 +3,7 @@ import prisma from "../prisma";
 import { getYouTubeClient } from "../youtube-account";
 import { youtube_v3 } from "googleapis";
 
-interface Channel {
+export interface Channel {
   id: string;
   title: string;
   description: string;
@@ -56,11 +56,13 @@ function isTruthy<T>(value: T | null | undefined): value is T {
   return Boolean(value);
 }
 
-interface Content {
+export interface Content {
   id: string;
   title: string;
   description: string;
   publishedAt: string;
+  accountId: string;
+  accountName: string;
 }
 
 export const getMyVideos = async (): Promise<Content[]> => {
@@ -85,9 +87,11 @@ export const getMyVideos = async (): Promise<Content[]> => {
     for (const account of dbAccounts) {
       const client = await getYouTubeClient(account.channelId);
       const channelList = await client.channels.list({
-        part: ["contentDetails"],
+        part: ["contentDetails", "snippet"],
         mine: true,
       });
+      const channelName = (channelList.data.items || [])[0]?.snippet
+        ?.title as string;
       const uploadPlaylist = (channelList.data.items || [])[0]?.contentDetails
         ?.relatedPlaylists?.uploads;
 
@@ -97,6 +101,8 @@ export const getMyVideos = async (): Promise<Content[]> => {
         maxResults: 50,
       });
 
+      // public, private이 함께 들어오고 필터링되므로 더 이상 동영상이 없을 때까지
+      // 반복해서 모든 영상을 가져와야함
       const publicVideos = (playlistItems.data.items ?? []).filter(
         (video) => video.status?.privacyStatus === "public" && video.id
       );
@@ -110,6 +116,8 @@ export const getMyVideos = async (): Promise<Content[]> => {
             title: video.snippet?.title ?? "",
             description: video.snippet?.description ?? "",
             publishedAt: video.snippet?.publishedAt ?? "",
+            accountId: account.channelId,
+            accountName: channelName,
           };
         })
         .filter(isTruthy);

@@ -30,6 +30,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Icons.ChartArea,
       },
       {
+        name: t("comment"),
+        url: "/comments",
+        icon: Icons.MessageCircleMore,
+      },
+      {
         name: t("settings"),
         url: "/settings",
         icon: Icons.Settings,

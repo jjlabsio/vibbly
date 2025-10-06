@@ -5,11 +5,23 @@
   "Sidebar": {
     "snsCategory": "SNS Management",
     "dashboard": "Dashboard",
+    "comment": "Comments",
     "settings": "Settings",
     "accountCategory": "Account Management",
     "planUpgrade": "Plan Upgrade"
   },
   "Dashboard": {
     "title": "Dashboard"
+  },
+  "Comments": {
+    "title": "Comments",
+    "videoList": "Video List"
+  },
+  "VideoTable": {
+    "Columns": {
+      "title": "Title",
+      "account": "Channel",
+      "publishedAt": "Upload date"
+    }
   }
 }

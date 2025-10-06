@@ -6,6 +6,7 @@ export const ChevronRight = Lucide.ChevronRight;
 export const Gem = Lucide.Gem;
 export const Languages = Lucide.Languages;
 export const LogOut = Lucide.LogOut;
+export const MessageCircleMore = Lucide.MessageCircleMore;
 export const Moon = Lucide.Moon;
 export const Settings = Lucide.Settings;
 export const Sun = Lucide.Sun;
