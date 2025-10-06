@@ -93,34 +93,14 @@ export const getMyVideos = async (): Promise<Content[]> => {
       const channelName = (channelList.data.items || [])[0]?.snippet
         ?.title as string;
       const uploadPlaylist = (channelList.data.items || [])[0]?.contentDetails
-        ?.relatedPlaylists?.uploads;
+        ?.relatedPlaylists?.uploads as string;
 
-      const playlistItems = await client.playlistItems.list({
-        part: ["id", "snippet", "contentDetails", "status"],
-        playlistId: uploadPlaylist,
-        maxResults: 50,
-      });
-
-      // public, private이 함께 들어오고 필터링되므로 더 이상 동영상이 없을 때까지
-      // 반복해서 모든 영상을 가져와야함
-      const publicVideos = (playlistItems.data.items ?? []).filter(
-        (video) => video.status?.privacyStatus === "public" && video.id
+      const videos = await getAllVideos(
+        client,
+        uploadPlaylist,
+        account.channelId,
+        channelName
       );
-
-      const videos = publicVideos
-        .map((video) => {
-          if (!video.id) return null;
-
-          return {
-            id: video.id,
-            title: video.snippet?.title ?? "",
-            description: video.snippet?.description ?? "",
-            publishedAt: video.snippet?.publishedAt ?? "",
-            accountId: account.channelId,
-            accountName: channelName,
-          };
-        })
-        .filter(isTruthy);
 
       allContents.push(...videos);
     }
@@ -131,3 +111,53 @@ export const getMyVideos = async (): Promise<Content[]> => {
     return [];
   }
 };
+
+/**
+ * 유튜브 업로드 플레이리스트의 모든 동영상 가져오기
+ * @param {string} uploadPlaylist - 채널의 업로드 플레이리스트 ID
+ * @param {string} accessToken - OAuth 인증 토큰
+ * @returns {Promise<Array>} 모든 동영상 목록
+ */
+async function getAllVideos(
+  client: youtube_v3.Youtube,
+  uploadPlaylist: string,
+  channelId: string,
+  channelName: string
+) {
+  let allVideos: Content[] = [];
+  let nextPageToken: string | undefined = undefined;
+
+  do {
+    const params: youtube_v3.Params$Resource$Playlistitems$List = {
+      part: ["id", "snippet", "contentDetails", "status"],
+      playlistId: uploadPlaylist,
+      maxResults: 50,
+      pageToken: nextPageToken,
+    };
+    const response = await client.playlistItems.list(params);
+
+    const items = response.data.items || [];
+    const publicItems = items.filter(
+      (item) => item.status?.privacyStatus === "public"
+    );
+    const formatted: Content[] = publicItems
+      .map((item) => {
+        if (!item.id) return null;
+
+        return {
+          id: item.id,
+          title: item.snippet?.title!,
+          description: item.snippet?.description!,
+          publishedAt: item.snippet?.publishedAt!,
+          accountId: channelId,
+          accountName: channelName,
+        };
+      })
+      .filter(isTruthy);
+    allVideos = allVideos.concat(formatted);
+
+    nextPageToken = response.data.nextPageToken ?? undefined;
+  } while (nextPageToken);
+
+  return allVideos;
+}
