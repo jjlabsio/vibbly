@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@vibbly/ui/components/card";
+
 import { getTranslations } from "next-intl/server";
 
 export default async function Page() {

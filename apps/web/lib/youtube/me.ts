@@ -142,10 +142,11 @@ async function getAllVideos(
     );
     const formatted: Content[] = publicItems
       .map((item) => {
-        if (!item.id) return null;
+        const id = item.contentDetails?.videoId;
+        if (!id) return null;
 
         return {
-          id: item.id,
+          id: id,
           title: item.snippet?.title!,
           description: item.snippet?.description!,
           publishedAt: item.snippet?.publishedAt!,
