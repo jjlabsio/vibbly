@@ -12,10 +12,11 @@
     "typecheck": "tsc --noEmit",
     "db:reset": "pnpm exec prisma generate",
     "db:push": "npx prisma db push",
-    "db:generate": "pnpm exec prisma generate"
+    "db:generate": "pnpm exec prisma generate",
+    "db:seed": "npx prisma db seed"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed/keyword.ts"
   },
   "dependencies": {
     "@auth/core": "^0.40.0",

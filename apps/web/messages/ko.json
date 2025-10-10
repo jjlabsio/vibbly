@@ -6,12 +6,17 @@
     "snsCategory": "SNS관리",
     "dashboard": "대시보드",
     "comment": "댓글 관리",
+    "keyword": "스팸 키워드 관리",
     "settings": "설정",
+
     "accountCategory": "계정관리",
     "planUpgrade": "플랜 업그레이드"
   },
   "Dashboard": {
     "title": "대시보드"
+  },
+  "Keywords": {
+    "title": "스팸 키워드 관리"
   },
   "Comments": {
     "title": "댓글 관리",

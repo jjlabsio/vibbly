@@ -6,12 +6,17 @@
     "snsCategory": "SNS Management",
     "dashboard": "Dashboard",
     "comment": "Comments",
+    "keyword": "Spam keywords",
     "settings": "Settings",
+
     "accountCategory": "Account Management",
     "planUpgrade": "Plan Upgrade"
   },
   "Dashboard": {
     "title": "Dashboard"
+  },
+  "Keywords": {
+    "title": "Spam keywords"
   },
   "Comments": {
     "title": "Comments",

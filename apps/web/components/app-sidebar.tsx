@@ -35,6 +35,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Icons.MessageCircleMore,
       },
       {
+        name: t("keyword"),
+        url: "/keywords",
+        icon: Icons.List,
+      },
+      {
         name: t("settings"),
         url: "/settings",
         icon: Icons.Settings,

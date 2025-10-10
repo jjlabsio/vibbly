@@ -1,0 +1,9 @@
+model Keyword {
+    text      String   @unique
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @map("user_id")
+    createdAt DateTime @default(now()) @map("created_at")
+
+    @@unique([userId, text])
+    @@map("keywords")
+}

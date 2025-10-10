@@ -2,6 +2,7 @@ import NextAuth, { NextAuthResult } from "next-auth";
 import Google from "next-auth/providers/google";
 import { serverApi } from "./lib/api";
 import { Prisma, User } from "./generated/prisma";
+import { DefaultSession, DefaultUser } from "@auth/core/types";
 
 export const nextAuth = NextAuth({
   providers: [
@@ -28,17 +29,20 @@ export const nextAuth = NextAuth({
     },
     jwt: async ({ token, account, user }) => {
       if (account) {
-        const dbUser = await _isExist(user.email as string);
+        let dbUser = await _isExist(user.email as string);
 
         if (!dbUser) {
-          await _signUp({
+          let dbUser = await _signUp({
             email: user.email as string,
             name: user.name as string,
             image: user.image as string,
           });
         }
 
+        console.log("dbUser :>> ", dbUser);
+
         Object.assign(token, {
+          userId: dbUser!.id,
           access_token: account.access_token,
           expires_at: account.expires_at,
           refresh_token: account.refresh_token,
@@ -60,7 +64,7 @@ export const nextAuth = NextAuth({
               client_id: process.env.AUTH_GOOGLE_ID!,
               client_secret: process.env.AUTH_GOOGLE_SECRET!,
               grant_type: "refresh_token",
-              refresh_token: token.refresh_token!,
+              refresh_token: token.refresh_token,
             }),
           });
 
@@ -93,7 +97,7 @@ export const nextAuth = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.error = token.error;
+      session.user.id = token.userId;
       return session;
     },
     authorized: async ({ auth }) => {
@@ -141,11 +145,15 @@ const _signUp = async ({ email, name, image }: Prisma.UserCreateInput) => {
 declare module "next-auth" {
   interface Session {
     error?: "RefreshTokenError";
+    user: {
+      id: string;
+    } & DefaultSession["user"];
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
+    userId: string;
     access_token: string;
     expires_at: number;
     refresh_token?: string;
