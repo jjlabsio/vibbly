@@ -32,14 +32,12 @@ export const nextAuth = NextAuth({
         let dbUser = await _isExist(user.email as string);
 
         if (!dbUser) {
-          let dbUser = await _signUp({
+          dbUser = await _signUp({
             email: user.email as string,
             name: user.name as string,
             image: user.image as string,
           });
         }
-
-        console.log("dbUser :>> ", dbUser);
 
         Object.assign(token, {
           userId: dbUser!.id,
@@ -115,16 +113,24 @@ export const signOut: NextAuthResult["signOut"] = nextAuth.signOut;
 export const auth: NextAuthResult["auth"] = nextAuth.auth;
 
 const _isExist = async (email: string) => {
-  const { data } = await serverApi.get<User | null>(
-    `/api/users?email=${email}`,
-    {
-      headers: {
-        "x-admin-key": process.env.INTERNAL_SECRET!,
-      },
-    }
-  );
+  try {
+    const { data } = await serverApi.get<User | null>(
+      `/api/users?email=${email}`,
+      {
+        headers: {
+          "x-admin-key": process.env.INTERNAL_SECRET!,
+        },
+      }
+    );
 
-  return data;
+    return data;
+  } catch (error: any) {
+    if (error.response.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
 };
 
 const _signUp = async ({ email, name, image }: Prisma.UserCreateInput) => {
