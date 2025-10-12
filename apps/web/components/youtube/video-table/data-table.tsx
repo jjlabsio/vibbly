@@ -20,10 +20,10 @@ import {
   TableRow,
 } from "@vibbly/ui/components/table";
 import React, { useMemo } from "react";
-import { DataTablePagination } from "./data-table-pagination";
 import { useTranslations } from "next-intl";
 import { DialogButton } from "./dialog-button";
 import { Content } from "@/lib/youtube/me";
+import { DataTablePagination } from "@/components/data-table-pagination";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];

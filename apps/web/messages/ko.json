@@ -16,7 +16,15 @@
     "title": "대시보드"
   },
   "Keywords": {
-    "title": "스팸 키워드 관리"
+    "title": "스팸 키워드 관리",
+    "Dialog": {
+      "title": "스팸 키워드 등록",
+      "description": "댓글에서 차단할 키워드를 입력하세요.",
+      "keywordLabel": "키워드",
+      "cancel": "취소",
+      "submit": "키워드 저장",
+      "success": "키워드를 생성했어요."
+    }
   },
   "Comments": {
     "title": "댓글 관리",

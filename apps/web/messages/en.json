@@ -16,7 +16,15 @@
     "title": "Dashboard"
   },
   "Keywords": {
-    "title": "Spam keywords"
+    "title": "Spam keywords",
+    "Dialog": {
+      "title": "Create spam keyword",
+      "description": "Enter a keyword to block in comments.",
+      "keywordLabel": "Keyword",
+      "cancel": "Cancel",
+      "submit": "Save keyword",
+      "success": "Keyword created."
+    }
   },
   "Comments": {
     "title": "Comments",

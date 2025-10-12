@@ -7,12 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@vibbly/ui/components/select";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import * as Icons from "@vibbly/ui/components/icons";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -61,7 +56,7 @@ export function DataTablePagination<TData>({
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to first page</span>
-            <ChevronsLeft />
+            <Icons.ChevronsLeft />
           </Button>
           <Button
             variant="outline"
@@ -71,7 +66,7 @@ export function DataTablePagination<TData>({
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to previous page</span>
-            <ChevronLeft />
+            <Icons.ChevronLeft />
           </Button>
           <Button
             variant="outline"
@@ -81,7 +76,7 @@ export function DataTablePagination<TData>({
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to next page</span>
-            <ChevronRight />
+            <Icons.ChevronRight />
           </Button>
           <Button
             variant="outline"
@@ -91,7 +86,7 @@ export function DataTablePagination<TData>({
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to last page</span>
-            <ChevronsRight />
+            <Icons.ChevronsRight />
           </Button>
         </div>
       </div>

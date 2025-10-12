@@ -6,6 +6,8 @@ import {
   CardTitle,
 } from "@vibbly/ui/components/card";
 import { getTranslations } from "next-intl/server";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
 export default async function Page() {
   const t = await getTranslations("Keywords");
@@ -19,11 +21,7 @@ export default async function Page() {
           <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div>
-            {data.map((el) => (
-              <div key={el.text}>{el.text}</div>
-            ))}
-          </div>
+          <DataTable columns={columns} data={data} />
         </CardContent>
       </Card>
     </div>
