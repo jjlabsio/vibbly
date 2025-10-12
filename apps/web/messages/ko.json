@@ -24,6 +24,14 @@
       "cancel": "취소",
       "submit": "키워드 저장",
       "success": "키워드를 생성했어요."
+    },
+    "EditDialog": {
+      "title": "스팸 키워드 수정",
+      "description": "댓글 차단에 사용할 키워드를 수정하세요.",
+      "keywordLabel": "키워드",
+      "cancel": "취소",
+      "submit": "키워드 업데이트",
+      "success": "키워드를 수정했어요."
     }
   },
   "Comments": {

@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Keyword } from "@/generated/prisma";
+import type { Keyword } from "@/generated/prisma";
 import { format } from "date-fns";
 import * as Icons from "@vibbly/ui/components/icons";
 import { Button } from "@vibbly/ui/components/button";
@@ -13,6 +13,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@vibbly/ui/components/dropdown-menu";
+
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData> {
+    openEditKeywordDialog?: (keyword: Keyword) => void;
+  }
+}
 
 export const columns: ColumnDef<Keyword>[] = [
   {
@@ -31,7 +37,7 @@ export const columns: ColumnDef<Keyword>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const keyword = row.original;
 
       return (
@@ -45,13 +51,18 @@ export const columns: ColumnDef<Keyword>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(keyword.text)}
+              onClick={() =>
+                table.options.meta?.openEditKeywordDialog?.(keyword)
+              }
             >
-              Copy payment ID
+              Edit keyword
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(keyword.text)}
+            >
+              Copy keyword
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

@@ -22,7 +22,9 @@ import {
   TableRow,
 } from "@vibbly/ui/components/table";
 import { useState } from "react";
+import type { Keyword } from "@/generated/prisma";
 import { CreateKeywordDialog } from "./dialog";
+import { EditKeywordDialog } from "./edit-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,6 +37,20 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingKeyword, setEditingKeyword] = useState<Keyword | null>(null);
+
+  const openEditKeywordDialog = (keyword: Keyword) => {
+    setEditingKeyword(keyword);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditDialogOpenChange = (open: boolean) => {
+    setEditDialogOpen(open);
+    if (!open) {
+      setEditingKeyword(null);
+    }
+  };
 
   const table = useReactTable({
     data,
@@ -46,6 +62,9 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
     },
+    meta: {
+      openEditKeywordDialog,
+    },
   });
 
   return (
@@ -53,6 +72,12 @@ export function DataTable<TData, TValue>({
       <CreateKeywordDialog
         open={createDialogOpen}
         setOpen={setCreateDialogOpen}
+      />
+      <EditKeywordDialog
+        key={editingKeyword?.id}
+        open={editDialogOpen}
+        setOpen={handleEditDialogOpenChange}
+        keyword={editingKeyword}
       />
       <div>
         <div className="flex items-center justify-between py-4">

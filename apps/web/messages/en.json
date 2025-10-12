@@ -24,6 +24,14 @@
       "cancel": "Cancel",
       "submit": "Save keyword",
       "success": "Keyword created."
+    },
+    "EditDialog": {
+      "title": "Edit spam keyword",
+      "description": "Update the keyword used to block comments.",
+      "keywordLabel": "Keyword",
+      "cancel": "Cancel",
+      "submit": "Update keyword",
+      "success": "Keyword updated."
     }
   },
   "Comments": {
