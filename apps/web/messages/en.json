@@ -24,6 +24,7 @@
       "cancel": "Cancel",
       "submit": "Save keyword",
       "success": "Keyword created.",
+      "error": "Failed to create keyword. Please try again.",
       "textError": "Please enter a keyword."
     },
     "EditDialog": {
@@ -33,6 +34,7 @@
       "cancel": "Cancel",
       "submit": "Update keyword",
       "success": "Keyword updated.",
+      "error": "Failed to update keyword. Please try again.",
       "textError": "Please enter a keyword."
     },
     "DeleteDialog": {
@@ -43,11 +45,36 @@
       "submit": "Delete keyword",
       "success": "Keyword deleted.",
       "error": "Failed to delete keyword. Please try again."
+    },
+    "Table": {
+      "filterPlaceholder": "Filter keywords...",
+      "addKeyword": "Add keyword",
+      "noResults": "No results.",
+      "Columns": {
+        "keyword": "Keyword",
+        "createdAt": "Created at"
+      },
+      "Actions": {
+        "label": "Actions",
+        "openMenu": "Open menu",
+        "copyKeyword": "Copy keyword",
+        "editKeyword": "Edit keyword",
+        "deleteKeyword": "Delete keyword"
+      }
     }
   },
   "Comments": {
     "title": "Comments",
     "videoList": "Video List"
+  },
+  "TablePagination": {
+    "rowsSelected": "{selected} of {total} row(s) selected.",
+    "rowsPerPage": "Rows per page",
+    "pageOf": "Page {page} of {total}",
+    "goToFirst": "Go to first page",
+    "goToPrevious": "Go to previous page",
+    "goToNext": "Go to next page",
+    "goToLast": "Go to last page"
   },
   "VideoTable": {
     "Columns": {

@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@vibbly/ui/components/table";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { Keyword } from "@/generated/prisma";
 import { CreateKeywordDialog } from "./create-dialog";
@@ -37,6 +38,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const t = useTranslations("Keywords.Table");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -105,7 +107,7 @@ export function DataTable<TData, TValue>({
       <div>
         <div className="flex items-center justify-between py-4">
           <Input
-            placeholder="Filter text..."
+            placeholder={t("filterPlaceholder")}
             value={(table.getColumn("text")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("text")?.setFilterValue(event.target.value)
@@ -114,7 +116,7 @@ export function DataTable<TData, TValue>({
           />
           <div>
             <Button onClick={() => setCreateDialogOpen(true)}>
-              Add Keyword
+              {t("addKeyword")}
             </Button>
           </div>
         </div>
@@ -161,7 +163,7 @@ export function DataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    {t("noResults")}
                   </TableCell>
                 </TableRow>
               )}

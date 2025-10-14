@@ -45,11 +45,36 @@
       "submit": "키워드 삭제",
       "success": "키워드를 삭제했어요.",
       "error": "키워드 삭제에 실패했어요. 다시 시도해주세요."
+    },
+    "Table": {
+      "filterPlaceholder": "키워드를 검색하세요...",
+      "addKeyword": "키워드 추가",
+      "noResults": "결과가 없어요.",
+      "Columns": {
+        "keyword": "키워드",
+        "createdAt": "생성일"
+      },
+      "Actions": {
+        "label": "작업",
+        "openMenu": "메뉴 열기",
+        "copyKeyword": "키워드 복사",
+        "editKeyword": "키워드 수정",
+        "deleteKeyword": "키워드 삭제"
+      }
     }
   },
   "Comments": {
     "title": "댓글 관리",
     "videoList": "동영상 목록"
+  },
+  "TablePagination": {
+    "rowsSelected": "{selected}개 중 {total}개가 선택되었어요.",
+    "rowsPerPage": "페이지당 행 수",
+    "pageOf": "{page} / {total}페이지",
+    "goToFirst": "첫 페이지로 이동",
+    "goToPrevious": "이전 페이지로 이동",
+    "goToNext": "다음 페이지로 이동",
+    "goToLast": "마지막 페이지로 이동"
   },
   "Settings": {
     "title": ""
