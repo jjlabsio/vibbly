@@ -26,7 +26,6 @@ import { useState } from "react";
 import type { Keyword } from "@/generated/prisma";
 import { CreateKeywordDialog } from "./create-dialog";
 import { EditKeywordDialog } from "./edit-dialog";
-import { deleteKeyword as deleteKeywordAction } from "@/lib/actions/keywords";
 import { DeleteKeywordDialog } from "./delete-dialog";
 
 interface DataTableProps<TData, TValue> {
