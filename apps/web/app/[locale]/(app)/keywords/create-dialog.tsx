@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionResult, createKeyword } from "@/lib/actions/keywords";
+import { ActionState, createKeyword } from "@/lib/actions/keywords";
 import { Button } from "@vibbly/ui/components/button";
 import {
   Dialog,
@@ -12,24 +12,26 @@ import {
   DialogTitle,
 } from "@vibbly/ui/components/dialog";
 import { Input } from "@vibbly/ui/components/input";
-import { Field, FieldLabel, FieldSet } from "@vibbly/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@vibbly/ui/components/field";
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
-export interface Props {
+export type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
-}
+};
 
 export function CreateKeywordDialog({ open, setOpen }: Props) {
-  const t = useTranslations("Keywords.Dialog");
-  const [state, formAction] = useActionState<ActionResult, FormData>(
-    createKeyword,
-    {
-      success: false,
-    }
-  );
+  const t = useTranslations("Keywords.CreateDialog");
+
+  const initState: ActionState = { success: false, message: null, errors: {} };
+  const [state, formAction] = useActionState(createKeyword, initState);
 
   useEffect(() => {
     if (state.success) {
@@ -37,8 +39,8 @@ export function CreateKeywordDialog({ open, setOpen }: Props) {
       setOpen(false);
     }
 
-    if (state.error) {
-      toast.error(state.error);
+    if (!state.success && state.message) {
+      toast.error(t("error"));
     }
   }, [setOpen, state, t]);
 
@@ -53,7 +55,15 @@ export function CreateKeywordDialog({ open, setOpen }: Props) {
           <FieldSet>
             <Field>
               <FieldLabel htmlFor="keyword">{t("keywordLabel")}</FieldLabel>
-              <Input id="keyword" name="keyword" />
+              <Input
+                id="keyword"
+                name="keyword"
+                aria-invalid={Boolean(state.errors?.text?.length)}
+              />
+              {state.errors?.text &&
+                state.errors.text.map((error) => (
+                  <FieldError key={error}>{t(error)}</FieldError>
+                ))}
             </Field>
 
             <Field>

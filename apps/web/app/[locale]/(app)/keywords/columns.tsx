@@ -17,6 +17,7 @@ import {
 declare module "@tanstack/react-table" {
   interface TableMeta<TData> {
     openEditKeywordDialog?: (keyword: Keyword) => void;
+    openDeleteKeywordDialog?: (keyword: Keyword) => void;
   }
 }
 
@@ -51,17 +52,23 @@ export const columns: ColumnDef<Keyword>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(keyword.text)}
+            >
+              Copy keyword
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={() =>
                 table.options.meta?.openEditKeywordDialog?.(keyword)
               }
             >
               Edit keyword
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(keyword.text)}
+              onClick={() =>
+                table.options.meta?.openDeleteKeywordDialog?.(keyword)
+              }
             >
-              Copy keyword
+              Delete keyword
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -23,8 +23,10 @@ import {
 } from "@vibbly/ui/components/table";
 import { useState } from "react";
 import type { Keyword } from "@/generated/prisma";
-import { CreateKeywordDialog } from "./dialog";
+import { CreateKeywordDialog } from "./create-dialog";
 import { EditKeywordDialog } from "./edit-dialog";
+import { deleteKeyword as deleteKeywordAction } from "@/lib/actions/keywords";
+import { DeleteKeywordDialog } from "./delete-dialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -39,6 +41,8 @@ export function DataTable<TData, TValue>({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingKeyword, setEditingKeyword] = useState<Keyword | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteKeyword, setDeleteKeyword] = useState<Keyword | null>(null);
 
   const openEditKeywordDialog = (keyword: Keyword) => {
     setEditingKeyword(keyword);
@@ -49,6 +53,18 @@ export function DataTable<TData, TValue>({
     setEditDialogOpen(open);
     if (!open) {
       setEditingKeyword(null);
+    }
+  };
+
+  const openDeleteKeywordDialog = (keyword: Keyword) => {
+    setDeleteKeyword(keyword);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    setDeleteDialogOpen(open);
+    if (!open) {
+      setDeleteKeyword(null);
     }
   };
 
@@ -64,6 +80,7 @@ export function DataTable<TData, TValue>({
     },
     meta: {
       openEditKeywordDialog,
+      openDeleteKeywordDialog,
     },
   });
 
@@ -78,6 +95,12 @@ export function DataTable<TData, TValue>({
         open={editDialogOpen}
         setOpen={handleEditDialogOpenChange}
         keyword={editingKeyword}
+      />
+      <DeleteKeywordDialog
+        key={deleteKeyword?.id}
+        open={deleteDialogOpen}
+        setOpen={handleDeleteDialogOpenChange}
+        keyword={deleteKeyword}
       />
       <div>
         <div className="flex items-center justify-between py-4">

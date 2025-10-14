@@ -17,13 +17,15 @@
   },
   "Keywords": {
     "title": "스팸 키워드 관리",
-    "Dialog": {
+    "CreateDialog": {
       "title": "스팸 키워드 등록",
       "description": "댓글에서 차단할 키워드를 입력하세요.",
       "keywordLabel": "키워드",
       "cancel": "취소",
       "submit": "키워드 저장",
-      "success": "키워드를 생성했어요."
+      "success": "키워드를 생성했어요.",
+      "error": "키워드 등록에 실패했어요. 다시 시도해주세요.",
+      "textError": "텍스트를 입력해주세요."
     },
     "EditDialog": {
       "title": "스팸 키워드 수정",
@@ -31,7 +33,18 @@
       "keywordLabel": "키워드",
       "cancel": "취소",
       "submit": "키워드 업데이트",
-      "success": "키워드를 수정했어요."
+      "success": "키워드를 수정했어요.",
+      "error": "키워드 수정에 실패했어요. 다시 시도해주세요.",
+      "textError": "텍스트를 입력해주세요."
+    },
+    "DeleteDialog": {
+      "title": "스팸 키워드 삭제",
+      "description": "\"{keyword}\" 키워드를 정말 삭제할까요? 이 작업은 되돌릴 수 없어요.",
+      "fallbackDescription": "이 키워드를 정말 삭제할까요? 이 작업은 되돌릴 수 없어요.",
+      "cancel": "취소",
+      "submit": "키워드 삭제",
+      "success": "키워드를 삭제했어요.",
+      "error": "키워드 삭제에 실패했어요. 다시 시도해주세요."
     }
   },
   "Comments": {
