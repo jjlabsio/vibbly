@@ -30,7 +30,7 @@ export const getMyChannels = async () => {
     const accounts: Channel[] = [];
 
     for (const account of dbAccounts) {
-      const client = await getYouTubeClient(account.channelId);
+      const client = await getYouTubeClient(account);
       const channels = await client.channels.list({
         part: ["id", "snippet"],
         id: [account.channelId],
@@ -85,7 +85,7 @@ export const getMyVideos = async (): Promise<Content[]> => {
     const allContents: Content[] = [];
 
     for (const account of dbAccounts) {
-      const client = await getYouTubeClient(account.channelId);
+      const client = await getYouTubeClient(account);
       const channelList = await client.channels.list({
         part: ["contentDetails", "snippet"],
         mine: true,

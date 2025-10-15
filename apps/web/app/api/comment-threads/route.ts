@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 import { getYouTubeClient } from "@/lib/youtube-account";
 import { youtube_v3 } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
@@ -21,6 +22,8 @@ export interface Comment extends CommentBase {
   replies?: Comment[];
 }
 
+// 오류가 있는 버전
+// 나중에 실제로 사용할 때 수정해서 사용
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const channelsParams = searchParams.get("channels");
@@ -37,7 +40,16 @@ export async function GET(req: NextRequest) {
 
   for (const channel of channels) {
     const newPromise = async () => {
-      const client = await getYouTubeClient(channel.id);
+      const youtubeAccount = await prisma.youtubeAccount.findUnique({
+        where: {
+          channelId: channel.id,
+        },
+      });
+      if (!youtubeAccount) {
+        return new Response("No youtube account matched", { status: 400 });
+      }
+
+      const client = await getYouTubeClient(youtubeAccount);
       const channelComments: Comment[] = [];
 
       for (const video of channel.videos) {
@@ -48,7 +60,7 @@ export async function GET(req: NextRequest) {
       return channelComments;
     };
 
-    promiseList.push(newPromise());
+    // promiseList.push(newPromise());
   }
 
   const allComments = (await Promise.all(promiseList)).flat();

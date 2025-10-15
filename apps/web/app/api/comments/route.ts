@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 import { getYouTubeClient } from "@/lib/youtube-account";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,7 +14,17 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Missing commentId" }, { status: 400 });
 
   try {
-    const youtubeClient = await getYouTubeClient(userId);
+    const channel = await prisma.youtubeAccount.findUnique({
+      where: {
+        channelId: userId,
+      },
+    });
+
+    if (!channel) {
+      return new Response("No channel matched", { status: 404 });
+    }
+
+    const youtubeClient = await getYouTubeClient(channel);
     // comments.delete는 자신이 작성한 댓글만 삭제 가능
     const result = await youtubeClient.comments.setModerationStatus({
       id: [commentId],
