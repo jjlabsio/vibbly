@@ -1,3 +1,4 @@
+import { YoutubeAccount } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { getYouTubeClient } from "@/lib/youtube-account";
 import { youtube_v3 } from "googleapis";
@@ -22,8 +23,22 @@ export interface Comment extends CommentBase {
   replies?: Comment[];
 }
 
-// 오류가 있는 버전
-// 나중에 실제로 사용할 때 수정해서 사용
+type AccountWithVideos = {
+  accountInfo: YoutubeAccount | null;
+  videos: Channels["videos"];
+};
+
+function hasAccountInfo(el: AccountWithVideos): el is Omit<
+  AccountWithVideos,
+  "accountInfo"
+> & {
+  accountInfo: YoutubeAccount;
+} {
+  return el.accountInfo !== null;
+}
+
+// getYoutubeClient 리팩토링에 대한 대응을 러프하게 작성한 버전
+// 정리가 필요함
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const channelsParams = searchParams.get("channels");
@@ -38,21 +53,27 @@ export async function GET(req: NextRequest) {
   const channels = JSON.parse(channelsParams) as Channels[];
   const promiseList: Promise<Comment[]>[] = [];
 
-  for (const channel of channels) {
-    const newPromise = async () => {
-      const youtubeAccount = await prisma.youtubeAccount.findUnique({
-        where: {
-          channelId: channel.id,
-        },
-      });
-      if (!youtubeAccount) {
-        return new Response("No youtube account matched", { status: 400 });
-      }
+  const accountPromises = channels.map(async (channel) => {
+    const account = await prisma.youtubeAccount.findUnique({
+      where: {
+        channelId: channel.id,
+      },
+    });
 
-      const client = await getYouTubeClient(youtubeAccount);
+    return {
+      accountInfo: account,
+      videos: channel.videos,
+    };
+  });
+
+  const accounts = (await Promise.all(accountPromises)).filter(hasAccountInfo);
+
+  for (const account of accounts) {
+    const newPromise = async () => {
+      const client = await getYouTubeClient(account.accountInfo);
       const channelComments: Comment[] = [];
 
-      for (const video of channel.videos) {
+      for (const video of account.videos) {
         const comments = await getAllComments(client, video);
         channelComments.push(...comments);
       }
@@ -60,7 +81,7 @@ export async function GET(req: NextRequest) {
       return channelComments;
     };
 
-    // promiseList.push(newPromise());
+    promiseList.push(newPromise());
   }
 
   const allComments = (await Promise.all(promiseList)).flat();
