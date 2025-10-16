@@ -17,7 +17,7 @@ import {
 } from "@vibbly/ui/components/tooltip";
 import { Spinner } from "@vibbly/ui/components/spinner";
 import { useState } from "react";
-import { Comment } from "@/app/api/comment-threads/route";
+import { CommentThreads } from "@/types/comment-threads";
 
 interface Props {
   open: boolean;
@@ -27,7 +27,7 @@ interface Props {
 
 export function DialogButton({ open, onOpenChange, videos }: Props) {
   const [loading, setLoading] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentThreads[]>([]);
 
   const handleOpen = async (value: boolean) => {
     if (videos.length === 0) {
@@ -37,7 +37,7 @@ export function DialogButton({ open, onOpenChange, videos }: Props) {
     setLoading(true);
     if (value) {
       const query = encodeURIComponent(JSON.stringify(videos));
-      const { data } = await api.get<Comment[]>(
+      const { data } = await api.get<CommentThreads[]>(
         `/api/comment-threads?channels=${query}`
       );
       setComments(data);
