@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import prisma from "../prisma";
 import { getYouTubeClient } from "../youtube-account";
 import { youtube_v3 } from "googleapis";
+import { paginateList } from "./pagination";
 
 export interface Channel {
   id: string;
@@ -114,33 +115,20 @@ export const getMyVideos = async (): Promise<Content[]> => {
 
 /**
  * 유튜브 업로드 플레이리스트의 모든 동영상 가져오기
- * @param {string} uploadPlaylist - 채널의 업로드 플레이리스트 ID
- * @param {string} accessToken - OAuth 인증 토큰
- * @returns {Promise<Array>} 모든 동영상 목록
  */
-async function getAllVideos(
+export const getAllVideos = async (
   client: youtube_v3.Youtube,
   uploadPlaylist: string,
   channelId: string,
   channelName: string
-) {
-  let allVideos: Content[] = [];
-  let nextPageToken: string | undefined = undefined;
+) => {
+  const parseItems = (
+    res: youtube_v3.Schema$PlaylistItemListResponse
+  ): Content[] => {
+    const items = res.items || [];
 
-  do {
-    const params: youtube_v3.Params$Resource$Playlistitems$List = {
-      part: ["id", "snippet", "contentDetails", "status"],
-      playlistId: uploadPlaylist,
-      maxResults: 50,
-      pageToken: nextPageToken,
-    };
-    const response = await client.playlistItems.list(params);
-
-    const items = response.data.items || [];
-    const publicItems = items.filter(
-      (item) => item.status?.privacyStatus === "public"
-    );
-    const formatted: Content[] = publicItems
+    const formatted: Content[] = items
+      .filter((item) => item.status?.privacyStatus === "public")
       .map((item) => {
         const id = item.contentDetails?.videoId;
         if (!id) return null;
@@ -155,10 +143,23 @@ async function getAllVideos(
         };
       })
       .filter(isTruthy);
-    allVideos = allVideos.concat(formatted);
 
-    nextPageToken = response.data.nextPageToken ?? undefined;
-  } while (nextPageToken);
+    return formatted;
+  };
 
-  return allVideos;
-}
+  const videos = await paginateList<
+    youtube_v3.Params$Resource$Playlistitems$List,
+    Content,
+    youtube_v3.Schema$PlaylistItemListResponse
+  >({
+    listFn: (params) => client.playlistItems.list(params),
+    initParams: {
+      part: ["id", "snippet", "contentDetails", "status"],
+      playlistId: uploadPlaylist,
+      maxResults: 50,
+    },
+    parseItems,
+  });
+
+  return videos;
+};

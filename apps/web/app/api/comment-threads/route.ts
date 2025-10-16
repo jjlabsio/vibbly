@@ -1,6 +1,7 @@
 import { YoutubeAccount } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { getYouTubeClient } from "@/lib/youtube-account";
+import { paginateList } from "@/lib/youtube/pagination";
 import { youtube_v3 } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -89,23 +90,28 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(allComments);
 }
 
+const formatComment = (
+  comment: youtube_v3.Schema$Comment,
+  videoId: string
+): CommentBase => {
+  return {
+    id: comment.id ?? "",
+    channelId: comment.snippet?.channelId ?? "",
+    videoId: videoId,
+    authorDisplayName: comment.snippet?.authorDisplayName ?? "",
+    textDisplay: comment.snippet?.textDisplay ?? "",
+    textOriginal: comment.snippet?.textOriginal ?? "",
+    publishedAt: comment.snippet?.publishedAt ?? "",
+  };
+};
+
 async function getAllComments(client: youtube_v3.Youtube, videoId: string) {
-  let allComments: Comment[] = [];
-  let nextPageToken: string | undefined = undefined;
+  const parseItems = (
+    res: youtube_v3.Schema$CommentThreadListResponse
+  ): Comment[] => {
+    const items = res.items || [];
 
-  do {
-    const params: youtube_v3.Params$Resource$Commentthreads$List = {
-      part: ["snippet", "replies"],
-      videoId: videoId,
-      maxResults: 100,
-      order: "time", // relevance = 인기댓글순. time = 최신순
-      pageToken: nextPageToken,
-    };
-    const response = await client.commentThreads.list(params);
-
-    const items = response.data.items || [];
-
-    const formatted: Comment[] = items.flatMap((item) => {
+    return items.flatMap((item) => {
       const topLevelComment = item.snippet?.topLevelComment; // comment resource
       const replies = item.replies?.comments; // (comment resource)[]
 
@@ -126,26 +132,22 @@ async function getAllComments(client: youtube_v3.Youtube, videoId: string) {
 
       return base;
     });
-
-    allComments = allComments.concat(formatted);
-
-    nextPageToken = response.data.nextPageToken ?? undefined;
-  } while (nextPageToken);
-
-  return allComments;
-}
-
-const formatComment = (
-  comment: youtube_v3.Schema$Comment,
-  videoId: string
-): CommentBase => {
-  return {
-    id: comment.id ?? "",
-    channelId: comment.snippet?.channelId ?? "",
-    videoId: videoId,
-    authorDisplayName: comment.snippet?.authorDisplayName ?? "",
-    textDisplay: comment.snippet?.textDisplay ?? "",
-    textOriginal: comment.snippet?.textOriginal ?? "",
-    publishedAt: comment.snippet?.publishedAt ?? "",
   };
-};
+
+  const comments = await paginateList<
+    youtube_v3.Params$Resource$Commentthreads$List,
+    Comment,
+    youtube_v3.Schema$CommentThreadListResponse
+  >({
+    listFn: (params) => client.commentThreads.list(params),
+    initParams: {
+      part: ["snippet", "replies"],
+      videoId: videoId,
+      maxResults: 100,
+      order: "time", // relevance = 인기댓글순. time = 최신순
+    },
+    parseItems,
+  });
+
+  return comments;
+}

@@ -46,6 +46,7 @@
     "@types/react-dom": "^19.1.7",
     "@vibbly/eslint-config": "workspace:^",
     "@vibbly/typescript-config": "workspace:*",
+    "googleapis-common": "^8.0.0",
     "prisma": "^6.16.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
