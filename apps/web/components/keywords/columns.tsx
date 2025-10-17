@@ -23,7 +23,11 @@ declare module "@tanstack/react-table" {
   }
 }
 
-function ColumnHeader({ translationKey }: { translationKey: "keyword" | "createdAt" }) {
+function ColumnHeader({
+  translationKey,
+}: {
+  translationKey: "keyword" | "createdAt";
+}) {
   const t = useTranslations("Keywords.Table.Columns");
 
   return <>{t(translationKey)}</>;
@@ -50,13 +54,17 @@ function ActionsCell({ keyword, onEdit, onDelete }: ActionsCellProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
         <DropdownMenuItem onClick={copyToClipboard}>
+          <Icons.Copy />
           {t("copyKeyword")}
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={onEdit}>
+          <Icons.SquarePen />
+          {t("editKeyword")}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onEdit}>{t("editKeyword")}</DropdownMenuItem>
-        <DropdownMenuItem onClick={onDelete}>
+        <DropdownMenuItem onClick={onDelete} variant="destructive">
+          <Icons.Trash2 />
           {t("deleteKeyword")}
         </DropdownMenuItem>
       </DropdownMenuContent>

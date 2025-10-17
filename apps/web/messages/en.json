@@ -55,7 +55,6 @@
         "createdAt": "Created at"
       },
       "Actions": {
-        "label": "Actions",
         "openMenu": "Open menu",
         "copyKeyword": "Copy keyword",
         "editKeyword": "Edit keyword",
