@@ -4,7 +4,9 @@ import { getYouTubeClient } from "@/lib/youtube-account";
 
 type Result = {
   success: boolean;
-  deletedIds: string[];
+  channelId: string;
+  deletedCommentNum?: number;
+  deletedCommentIds?: string[];
   message?: string;
 };
 
@@ -37,7 +39,7 @@ export async function GET() {
       if (!commentIds) {
         return {
           success: false,
-          deletedIds: [],
+          channelId,
           message: "There is no pending comment id for this channel",
         };
       }
@@ -47,13 +49,15 @@ export async function GET() {
 
         return {
           success: true,
-          deletedIds: commentIds,
+          channelId,
+          deletedCommentNum: commentIds.length,
+          deletedCommentIds: commentIds,
         };
       } catch (error) {
         console.error(error);
         return {
           success: false,
-          deletedIds: [],
+          channelId,
           message: `Delete comment failed for channel ${channelId} `,
         };
       }

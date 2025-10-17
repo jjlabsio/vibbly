@@ -6,6 +6,13 @@ import { youtube_v3 } from "googleapis";
 import { parseItems } from "@/lib/youtube/comment-threads";
 import { CommentStatus, YoutubeAccount } from "@/generated/prisma";
 
+type Result = {
+  success: boolean;
+  channelId: string;
+  removeCommentNum?: number;
+  removeCommentIds?: string[];
+};
+
 export async function GET(request: Request) {
   const env = process.env.NODE_ENV;
 
@@ -21,11 +28,16 @@ export async function GET(request: Request) {
   const channels = await prisma.youtubeAccount.findMany();
 
   // Todo: 채널이 너무 많아지면 p-limit 적용 추후에 고려
-  const results = await Promise.all(
+  const results: Result[] = await Promise.all(
     channels.map(async (channel) => {
       try {
-        const result = await detectProcess(channel);
-        return { success: result, channelId: channel.channelId };
+        const removeComments = await detectProcess(channel);
+        return {
+          success: true,
+          channelId: channel.channelId,
+          removeCommentNum: removeComments.length,
+          removeCommentIds: removeComments.map((comment) => comment.id),
+        };
       } catch (error) {
         return { success: false, channelId: channel.channelId };
       }
@@ -87,10 +99,11 @@ const detectProcess = async (channel: YoutubeAccount) => {
         textOriginal,
         publishedAt,
         status: CommentStatus.SpamPendingDelete,
+        deletedAt: new Date(),
       })
     ),
     skipDuplicates: true,
   });
 
-  return true;
+  return removeComments;
 };
