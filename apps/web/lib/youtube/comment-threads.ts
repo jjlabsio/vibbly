@@ -15,9 +15,10 @@ export const formatComment = (
   };
 };
 
-export const parseItems = (
-  res: youtube_v3.Schema$CommentThreadListResponse
-): CommentThreads[] => {
+export const parseItems = <T extends boolean>(
+  res: youtube_v3.Schema$CommentThreadListResponse,
+  flat?: T
+): T extends true ? CommentThreadsBase[] : CommentThreads[] => {
   const items = res.items || [];
 
   return items.flatMap((item) => {
@@ -31,10 +32,12 @@ export const parseItems = (
     if (replies) {
       const formattedReplies = replies.map(formatComment);
 
-      return {
-        ...base,
-        replies: formattedReplies,
-      };
+      return flat
+        ? [base, ...formattedReplies]
+        : {
+            ...base,
+            replies: formattedReplies,
+          };
     }
 
     return base;

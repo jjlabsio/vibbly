@@ -1,0 +1,22 @@
+enum CommentStatus {
+    Active
+    SpamPendingDelete
+    Deleted
+    SpamExcluded // 유저가 삭제하지 않기로 결정한 댓글
+}
+
+model Comment {
+    id                String         @id
+    youtubeAccount    YoutubeAccount @relation(fields: [channelId], references: [channelId])
+    channelId         String
+    videoId           String         @map("video_id")
+    authorDisplayName String         @map("author_display_name")
+    textDisplay       String         @map("text_display")
+    textOriginal      String         @map("text_original")
+    publishedAt       DateTime       @map("published_at")
+    status            CommentStatus
+    createdAt         DateTime       @default(now()) @map("created_at")
+    deletedAt         DateTime?      @map("deleted_at")
+
+    @@map("comments")
+}
