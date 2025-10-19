@@ -1,5 +1,6 @@
 import { Keyword } from "@/generated/prisma";
 import { deleteKeyword } from "@/lib/actions/keywords";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@vibbly/ui/components/button";
 import {
   Dialog,
@@ -11,6 +12,7 @@ import {
   DialogTitle,
 } from "@vibbly/ui/components/dialog";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export interface Props {
   open: boolean;
@@ -20,12 +22,17 @@ export interface Props {
 
 export function DeleteKeywordDialog({ open, setOpen, keyword }: Props) {
   const t = useTranslations("Keywords.DeleteDialog");
+  const queryClient = useQueryClient();
 
   const deleteKeywordWithId = deleteKeyword.bind(null, keyword?.id || "");
 
-  const handleAction = () => {
-    deleteKeywordWithId();
+  const handleAction = async () => {
+    await deleteKeywordWithId();
+
     setOpen(false);
+    toast.success(t("success"));
+
+    queryClient.invalidateQueries({ queryKey: ["keywords"] });
   };
 
   return (

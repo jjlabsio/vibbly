@@ -1,32 +1,109 @@
+import { auth } from "@/auth";
+import { CreateKeywordSchema, EditKeywordSchema } from "@/schema/keyword";
 import prisma from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const id = searchParams.get("id");
-
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  }
-
+export async function GET() {
   try {
-    const data = await prisma.keyword.findUnique({
+    const session = await auth();
+    const userId = session?.user.id;
+
+    if (!userId) {
+      return new Response("No userId in session", { status: 404 });
+    }
+
+    const data = await prisma.keyword.findMany({
       where: {
-        id,
+        userId,
       },
     });
 
-    if (!data) {
-      return NextResponse.json({ error: "Keyword not found" }, { status: 404 });
+    return Response.json(data);
+  } catch (error) {
+    console.error(error);
+    return Response.json(
+      { error: "서버 내부 오류가 발생했습니다." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await auth();
+    const userId = session?.user.id;
+
+    if (!userId) {
+      return new Response("No userId in session", { status: 404 });
     }
 
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("Failed to fetch keyword", error);
-    return NextResponse.json(
-      {
-        error: "Failed to fetch keyword",
+    const body = await req.json();
+    const validatedFields = CreateKeywordSchema.safeParse(body);
+
+    if (!validatedFields.success) {
+      return Response.json(
+        {
+          error: validatedFields.error.flatten().fieldErrors,
+        },
+        { status: 401 }
+      );
+    }
+
+    const { text } = validatedFields.data;
+
+    const res = await prisma.keyword.create({
+      data: {
+        text,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
+    });
+    return Response.json(res);
+  } catch (error) {
+    console.error("POST /api/keywords error:", error);
+
+    return Response.json(
+      { error: "서버 내부 오류가 발생했습니다." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const validatedFields = EditKeywordSchema.safeParse(body);
+
+    if (!validatedFields.success) {
+      return Response.json(
+        {
+          error: validatedFields.error.flatten().fieldErrors,
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    const { text, id } = validatedFields.data;
+
+    const res = await prisma.keyword.update({
+      where: {
+        id,
+      },
+      data: {
+        text,
+      },
+    });
+
+    return Response.json(res);
+  } catch (error) {
+    console.error("PUT /api/keywords error:", error);
+
+    return Response.json(
+      { error: "서버 내부 오류가 발생했습니다." },
       { status: 500 }
     );
   }

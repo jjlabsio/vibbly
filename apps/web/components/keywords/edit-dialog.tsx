@@ -1,7 +1,10 @@
 "use client";
 
 import { Keyword } from "@/generated/prisma";
-import { ActionState, editKeyword } from "@/lib/actions/keywords";
+import { api } from "@/lib/api";
+import { EditKeywordSchema } from "@/schema/keyword";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@vibbly/ui/components/button";
 import {
   Dialog,
@@ -15,13 +18,16 @@ import {
 import {
   Field,
   FieldError,
+  FieldGroup,
   FieldLabel,
-  FieldSet,
 } from "@vibbly/ui/components/field";
+import { Form } from "@vibbly/ui/components/form";
 import { Input } from "@vibbly/ui/components/input";
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect } from "react";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import z from "zod";
 
 export interface Props {
   open: boolean;
@@ -30,22 +36,38 @@ export interface Props {
 }
 
 export function EditKeywordDialog({ open, setOpen, keyword }: Props) {
+  if (!keyword) return null;
+
   const t = useTranslations("Keywords.EditDialog");
+  const queryClient = useQueryClient();
 
-  const initState: ActionState = { success: false, message: null, errors: {} };
-  const editKeywordWithId = editKeyword.bind(null, keyword?.id ?? "");
-  const [state, formAction] = useActionState(editKeywordWithId, initState);
+  const form = useForm<z.infer<typeof EditKeywordSchema>>({
+    resolver: zodResolver(EditKeywordSchema),
+    defaultValues: {
+      text: keyword.text,
+      id: keyword.id,
+    },
+  });
 
-  useEffect(() => {
-    if (state.success) {
-      toast.success(t("success"));
+  const onSubmit = async (values: z.infer<typeof EditKeywordSchema>) => {
+    try {
+      await api.put("/api/keywords", values);
+
       setOpen(false);
-    }
+      toast.success(t("success"));
 
-    if (!state.success && state.message) {
+      queryClient.invalidateQueries({ queryKey: ["keywords"] });
+    } catch (error) {
+      console.error(error);
       toast.error(t("error"));
     }
-  }, [setOpen, state, t]);
+  };
+
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -55,32 +77,49 @@ export function EditKeywordDialog({ open, setOpen, keyword }: Props) {
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
-        <form action={formAction}>
-          <FieldSet>
-            <Field>
-              <FieldLabel htmlFor="keyword">{t("keywordLabel")}</FieldLabel>
-              <Input
-                id="keyword"
-                name="keyword"
-                defaultValue={keyword?.text ?? ""}
-                aria-invalid={Boolean(state.errors?.text?.length)}
+        <Form {...form}>
+          <form
+            id="edit-keyword-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
+          >
+            <FieldGroup>
+              <Controller
+                name="text"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="edit-dialog-text">
+                      {t("keywordLabel")}
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="edit-dialog-text"
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="off"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
               />
-              {state.errors?.text &&
-                state.errors.text.map((error) => (
-                  <FieldError key={error}>{t(error)}</FieldError>
-                ))}
-            </Field>
+            </FieldGroup>
+          </form>
+        </Form>
 
-            <Field>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">{t("cancel")}</Button>
-                </DialogClose>
-                <Button type="submit">{t("submit")}</Button>
-              </DialogFooter>
-            </Field>
-          </FieldSet>
-        </form>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">{t("cancel")}</Button>
+          </DialogClose>
+          <Button
+            type="submit"
+            form="edit-keyword-form"
+            disabled={form.formState.isSubmitting}
+          >
+            {t("submit")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
