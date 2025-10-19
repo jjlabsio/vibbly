@@ -15,6 +15,11 @@ export async function GET() {
       where: {
         userId,
       },
+      orderBy: [
+        {
+          updatedAt: "desc",
+        },
+      ],
     });
 
     return Response.json(data);
