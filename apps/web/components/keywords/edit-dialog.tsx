@@ -33,13 +33,18 @@ export interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   keyword: Keyword | null;
+  onSuccess?: () => void;
 }
 
-export function EditKeywordDialog({ open, setOpen, keyword }: Props) {
+export function EditKeywordDialog({
+  open,
+  setOpen,
+  keyword,
+  onSuccess,
+}: Props) {
   if (!keyword) return null;
 
   const t = useTranslations("Keywords.EditDialog");
-  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof EditKeywordSchema>>({
     resolver: zodResolver(EditKeywordSchema),
@@ -56,7 +61,7 @@ export function EditKeywordDialog({ open, setOpen, keyword }: Props) {
       setOpen(false);
       toast.success(t("success"));
 
-      queryClient.invalidateQueries({ queryKey: ["keywords"] });
+      onSuccess && onSuccess();
     } catch (error) {
       console.error(error);
       toast.error(t("error"));

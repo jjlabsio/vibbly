@@ -136,3 +136,13 @@ export async function deleteKeyword(id: string) {
 
   revalidatePath("/keywords");
 }
+
+export async function deleteKeywordList(ids: string[]) {
+  await prisma.keyword.deleteMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+  });
+}

@@ -46,13 +46,22 @@
       "success": "Keyword deleted.",
       "error": "Failed to delete keyword. Please try again."
     },
+    "DeleteListDialog": {
+      "title": "Delete selected keywords",
+      "description": "{count, plural, one {Are you sure you want to delete this keyword? This action cannot be undone.} other {Are you sure you want to delete these {count} keywords? This action cannot be undone.}}",
+      "cancel": "Cancel",
+      "submit": "Delete keywords",
+      "success": "{count, plural, one {Keyword deleted.} other {{count} keywords deleted.}}",
+      "error": "Failed to delete keywords. Please try again."
+    },
     "Table": {
       "filterPlaceholder": "Filter keywords...",
       "addKeyword": "Add keyword",
+      "deleteSelected": "Delete selected",
       "noResults": "No results.",
       "Columns": {
         "keyword": "Keyword",
-        "createdAt": "Created at"
+        "updatedAt": "Updated At"
       },
       "Actions": {
         "openMenu": "Open menu",

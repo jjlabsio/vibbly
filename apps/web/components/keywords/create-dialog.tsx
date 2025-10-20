@@ -31,11 +31,11 @@ import { useQueryClient } from "@tanstack/react-query";
 export type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
+  onSuccess?: () => void;
 };
 
-export function CreateKeywordDialog({ open, setOpen }: Props) {
+export function CreateKeywordDialog({ open, setOpen, onSuccess }: Props) {
   const t = useTranslations("Keywords.CreateDialog");
-  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof CreateKeywordSchema>>({
     resolver: zodResolver(CreateKeywordSchema),
@@ -51,7 +51,7 @@ export function CreateKeywordDialog({ open, setOpen }: Props) {
       setOpen(false);
       toast.success(t("success"));
 
-      queryClient.invalidateQueries({ queryKey: ["keywords"] });
+      onSuccess && onSuccess();
     } catch (error) {
       console.error(error);
       toast.error(t("error"));

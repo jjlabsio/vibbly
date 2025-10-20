@@ -27,23 +27,27 @@ import type { Keyword } from "@/generated/prisma";
 import { CreateKeywordDialog } from "./create-dialog";
 import { EditKeywordDialog } from "./edit-dialog";
 import { DeleteKeywordDialog } from "./delete-dialog";
+import { DeleteKeywordListDialog } from "./delete-list-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends Keyword, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
   const t = useTranslations("Keywords.Table");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingKeyword, setEditingKeyword] = useState<Keyword | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteKeyword, setDeleteKeyword] = useState<Keyword | null>(null);
+  const [deleteListDialogOpen, setDeleteListDialogOpen] = useState(false);
 
   const openEditKeywordDialog = (keyword: Keyword) => {
     setEditingKeyword(keyword);
@@ -76,8 +80,11 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.id,
     state: {
       columnFilters,
+      rowSelection,
     },
     meta: {
       openEditKeywordDialog,
@@ -85,23 +92,39 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const queryClient = useQueryClient();
+  const onSuccess = () => {
+    table.resetRowSelection();
+    queryClient.invalidateQueries({ queryKey: ["keywords"] });
+  };
+
   return (
     <>
       <CreateKeywordDialog
         open={createDialogOpen}
         setOpen={setCreateDialogOpen}
+        onSuccess={onSuccess}
       />
       <EditKeywordDialog
         key={editingKeyword?.id}
         open={editDialogOpen}
         setOpen={handleEditDialogOpenChange}
         keyword={editingKeyword}
+        onSuccess={onSuccess}
       />
       <DeleteKeywordDialog
         key={deleteKeyword?.id}
         open={deleteDialogOpen}
         setOpen={handleDeleteDialogOpenChange}
         keyword={deleteKeyword}
+        onSuccess={onSuccess}
+      />
+      <DeleteKeywordListDialog
+        key={Object.keys(rowSelection).join()}
+        open={deleteListDialogOpen}
+        setOpen={setDeleteListDialogOpen}
+        keywordIds={Object.keys(rowSelection)}
+        onSuccess={onSuccess}
       />
       <div>
         <div className="flex items-center justify-between py-4">
@@ -113,7 +136,14 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <div>
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              disabled={Object.keys(rowSelection).length === 0}
+              onClick={() => setDeleteListDialogOpen(true)}
+            >
+              {t("deleteSelected")}
+            </Button>
             <Button onClick={() => setCreateDialogOpen(true)}>
               {t("addKeyword")}
             </Button>

@@ -15,6 +15,7 @@ import {
 } from "@vibbly/ui/components/dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
+import { Checkbox } from "@vibbly/ui/components/checkbox";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData> {
@@ -26,7 +27,7 @@ declare module "@tanstack/react-table" {
 function ColumnHeader({
   translationKey,
 }: {
-  translationKey: "keyword" | "createdAt";
+  translationKey: "keyword" | "updatedAt";
 }) {
   const t = useTranslations("Keywords.Table.Columns");
 
@@ -74,14 +75,36 @@ function ActionsCell({ keyword, onEdit, onDelete }: ActionsCellProps) {
 
 export const columns: ColumnDef<Keyword>[] = [
   {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     accessorKey: "text",
     header: () => <ColumnHeader translationKey="keyword" />,
   },
   {
-    accessorKey: "createdAt",
-    header: () => <ColumnHeader translationKey="createdAt" />,
+    accessorKey: "updatedAt",
+    header: () => <ColumnHeader translationKey="updatedAt" />,
     cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
+      const date = new Date(row.getValue("updatedAt"));
       const formatted = format(date, "yyyy.MM.dd HH:mm");
 
       return <div className="text-left font-medium">{formatted}</div>;

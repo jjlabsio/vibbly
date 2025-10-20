@@ -1,5 +1,4 @@
-import { Keyword } from "@/generated/prisma";
-import { deleteKeyword } from "@/lib/actions/keywords";
+import { deleteKeywordList } from "@/lib/actions/keywords";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@vibbly/ui/components/button";
 import {
@@ -17,25 +16,26 @@ import { toast } from "sonner";
 export interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
-  keyword: Keyword | null;
+  keywordIds: string[];
   onSuccess?: () => void;
 }
 
-export function DeleteKeywordDialog({
+export function DeleteKeywordListDialog({
   open,
   setOpen,
-  keyword,
+  keywordIds = [],
   onSuccess,
 }: Props) {
-  const t = useTranslations("Keywords.DeleteDialog");
+  const t = useTranslations("Keywords.DeleteListDialog");
+  const selectedCount = keywordIds.length;
 
-  const deleteKeywordWithId = deleteKeyword.bind(null, keyword?.id || "");
+  const deleteKeywordListWithId = deleteKeywordList.bind(null, keywordIds);
 
   const handleAction = async () => {
-    await deleteKeywordWithId();
+    await deleteKeywordListWithId();
 
     setOpen(false);
-    toast.success(t("success"));
+    toast.success(t("success", { count: selectedCount }));
 
     onSuccess && onSuccess();
   };
@@ -45,7 +45,9 @@ export function DeleteKeywordDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("fallbackDescription")}</DialogDescription>
+          <DialogDescription>
+            {t("description", { count: selectedCount })}
+          </DialogDescription>
         </DialogHeader>
         <form action={handleAction}>
           <DialogFooter>
