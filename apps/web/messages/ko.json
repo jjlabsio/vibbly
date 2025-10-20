@@ -67,7 +67,7 @@
     "videoList": "동영상 목록"
   },
   "TablePagination": {
-    "rowsSelected": "{selected}개 중 {total}개가 선택되었어요.",
+    "rowsSelected": "{total}개 중 {selected}개가 선택되었어요.",
     "rowsPerPage": "페이지당 행 수",
     "pageOf": "{page} / {total}페이지",
     "goToFirst": "첫 페이지로 이동",
