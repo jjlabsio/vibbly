@@ -1,7 +1,6 @@
 {
   "extends": "@vibbly/typescript-config/react-library.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@vibbly/ui/*": ["./src/*"]
     }
