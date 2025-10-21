@@ -10,7 +10,18 @@ type Result = {
   message?: string;
 };
 
-export async function GET() {
+export async function GET(request: Request) {
+  const env = process.env.NODE_ENV;
+
+  if (env === "production") {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
+  }
+
   const pendingDeleteComments = await prisma.comment.findMany({
     where: {
       status: CommentStatus.SpamPendingDelete,
