@@ -99,7 +99,6 @@ const detectProcess = async (channel: YoutubeAccount) => {
         textOriginal,
         publishedAt,
         status: CommentStatus.SpamPendingDelete,
-        deletedAt: new Date(),
       })
     ),
     skipDuplicates: true,

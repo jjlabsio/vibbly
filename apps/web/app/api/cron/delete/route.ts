@@ -82,4 +82,16 @@ const deleteProcess = async (channelId: string, commentIds: string[]) => {
     id: commentIds,
     moderationStatus: "rejected",
   });
+
+  await prisma.comment.updateMany({
+    where: {
+      id: {
+        in: commentIds,
+      },
+    },
+    data: {
+      status: CommentStatus.Deleted,
+      deletedAt: new Date(),
+    },
+  });
 };
