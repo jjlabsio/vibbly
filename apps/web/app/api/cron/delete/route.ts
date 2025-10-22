@@ -1,13 +1,25 @@
-import { CommentStatus } from "@/generated/prisma";
+import {
+  AutomationJob,
+  AutomationPlan,
+  AutomationRunStatus,
+  CommentStatus,
+} from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { getYouTubeClient } from "@/lib/youtube-account";
 
-type Result = {
-  success: boolean;
-  channelId: string;
-  deletedCommentNum?: number;
-  deletedCommentIds?: string[];
-  message?: string;
+type Result = SuccessResult | FailResult;
+
+type SuccessResult = {
+  success: true;
+  accountId: string;
+  userId: string;
+  deletedCommentNum: number;
+  deletedCommentIds: string[];
+};
+
+type FailResult = {
+  success: false;
+  accountId: string;
 };
 
 export async function GET(request: Request) {
@@ -22,6 +34,15 @@ export async function GET(request: Request) {
     }
   }
 
+  // 1. start run log
+  const automationLog = await prisma.automationRunLog.create({
+    data: {
+      job: AutomationJob.DELETE,
+      plan: AutomationPlan.BASIC,
+    },
+  });
+
+  // 2. delete
   const pendingDeleteComments = await prisma.comment.findMany({
     where: {
       status: CommentStatus.SpamPendingDelete,
@@ -44,23 +65,23 @@ export async function GET(request: Request) {
 
   const channelIds = Array.from(commentMap.keys());
 
-  const result: Result[] = await Promise.all(
+  const results: Result[] = await Promise.all(
     channelIds.map(async (channelId) => {
       const commentIds = commentMap.get(channelId);
       if (!commentIds) {
         return {
           success: false,
-          channelId,
-          message: "There is no pending comment id for this channel",
+          accountId: channelId,
         };
       }
 
       try {
-        await deleteProcess(channelId, commentIds);
+        const { userId } = await deleteProcess(channelId, commentIds);
 
         return {
           success: true,
-          channelId,
+          accountId: channelId,
+          userId,
           deletedCommentNum: commentIds.length,
           deletedCommentIds: commentIds,
         };
@@ -68,14 +89,44 @@ export async function GET(request: Request) {
         console.error(error);
         return {
           success: false,
-          channelId,
-          message: `Delete comment failed for channel ${channelId} `,
+          accountId: channelId,
         };
       }
     })
   );
 
-  return Response.json(result);
+  // 3. account metric log
+  await prisma.automationRunAccountMetric.createMany({
+    data: results
+      .filter((result) => result.success)
+      .map((result) => ({
+        runId: automationLog.id,
+        socialAccountId: result.accountId,
+        userId: result.userId,
+        deletionCount: result.deletedCommentNum,
+      })),
+  });
+
+  // 4. complete run log
+  const completedAt = new Date();
+  const durationMs = completedAt.getTime() - automationLog.startedAt.getTime();
+  const deletionCount = results
+    .filter((result) => result.success)
+    .reduce((acc, cur) => acc + cur.deletedCommentNum, 0);
+
+  await prisma.automationRunLog.update({
+    where: {
+      id: automationLog.id,
+    },
+    data: {
+      status: AutomationRunStatus.SUCCESS,
+      completedAt,
+      durationMs,
+      deletionCount,
+    },
+  });
+
+  return Response.json(results);
 }
 
 const deleteProcess = async (channelId: string, commentIds: string[]) => {
@@ -94,7 +145,8 @@ const deleteProcess = async (channelId: string, commentIds: string[]) => {
     moderationStatus: "rejected",
   });
 
-  await prisma.comment.updateMany({
+  const deletedAt = new Date();
+  const result = await prisma.comment.updateMany({
     where: {
       id: {
         in: commentIds,
@@ -102,7 +154,13 @@ const deleteProcess = async (channelId: string, commentIds: string[]) => {
     },
     data: {
       status: CommentStatus.Deleted,
-      deletedAt: new Date(),
+      deletedAt,
     },
   });
+  result.count;
+
+  return {
+    userId: channel.userId,
+    deletedAt,
+  };
 };

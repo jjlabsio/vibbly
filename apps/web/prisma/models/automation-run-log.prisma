@@ -1,0 +1,64 @@
+model AutomationRunLog {
+    id          String              @id @default(cuid())
+    job         AutomationJob
+    plan        AutomationPlan      @default(BASIC)
+    trigger     AutomationTrigger   @default(VERCEL_CRON)
+    status      AutomationRunStatus @default(IN_PROGRESS)
+    startedAt   DateTime            @default(now()) @map("started_at")
+    completedAt DateTime?           @map("completed_at")
+    durationMs  Int?                @map("duration_ms")
+
+    detectionCount Int? @map("detection_count")
+    newSpamCount   Int? @map("new_spam_count")
+    deletionCount  Int? @map("deletion_count")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    automationRunAccountMetric AutomationRunAccountMetric[]
+
+    @@index([job, startedAt])
+    @@index([status])
+    @@map("automation_run_log")
+}
+
+model AutomationRunAccountMetric {
+    id              String @id @default(cuid())
+    runId           String @map("run_id")
+    socialAccountId String @map("social_account_id")
+    userId          String @map("user_id")
+
+    detectionCount Int? @map("detection_count")
+    newSpamCount   Int? @map("new_spam_count")
+    deletionCount  Int? @map("deletion_count")
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    run     AutomationRunLog @relation(fields: [runId], references: [id], onDelete: Cascade)
+    channel YoutubeAccount   @relation(fields: [socialAccountId], references: [channelId])
+    user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("automation_run_account_metric")
+}
+
+enum AutomationJob {
+    DETECT
+    DELETE
+}
+
+enum AutomationPlan {
+    BASIC
+    PREMIUM
+}
+
+enum AutomationTrigger {
+    VERCEL_CRON
+    USER
+}
+
+enum AutomationRunStatus {
+    IN_PROGRESS
+    SUCCESS
+    WARNING
+    ERROR
+}
