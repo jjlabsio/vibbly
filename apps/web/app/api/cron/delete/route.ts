@@ -76,7 +76,11 @@ export async function GET(request: Request) {
       }
 
       try {
-        const { userId } = await deleteProcess(channelId, commentIds);
+        const { userId } = await deleteProcess(
+          channelId,
+          commentIds,
+          automationLog.id
+        );
 
         return {
           success: true,
@@ -129,7 +133,11 @@ export async function GET(request: Request) {
   return Response.json(results);
 }
 
-const deleteProcess = async (channelId: string, commentIds: string[]) => {
+const deleteProcess = async (
+  channelId: string,
+  commentIds: string[],
+  automationLogId: string
+) => {
   const channel = await prisma.youtubeAccount.findUnique({
     where: {
       channelId: channelId,
@@ -154,7 +162,7 @@ const deleteProcess = async (channelId: string, commentIds: string[]) => {
     },
     data: {
       status: CommentStatus.Deleted,
-      deletedAt,
+      deleteRunId: automationLogId,
     },
   });
   result.count;

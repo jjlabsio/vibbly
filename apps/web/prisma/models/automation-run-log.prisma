@@ -16,10 +16,12 @@ model AutomationRunLog {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     automationRunAccountMetric AutomationRunAccountMetric[]
+    commentDetectRun           Comment[]                    @relation(name: "comment_detect_run")
+    commentDeleteRun           Comment[]                    @relation(name: "comment_delete_run")
 
     @@index([job, startedAt])
     @@index([status])
-    @@map("automation_run_log")
+    @@map("automation_run_logs")
 }
 
 model AutomationRunAccountMetric {
@@ -38,7 +40,7 @@ model AutomationRunAccountMetric {
     channel YoutubeAccount   @relation(fields: [socialAccountId], references: [channelId])
     user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("automation_run_account_metric")
+    @@map("automation_run_account_metrics")
 }
 
 enum AutomationJob {

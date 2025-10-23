@@ -56,7 +56,10 @@ export async function GET(request: Request) {
   const results: Result[] = await Promise.all(
     channels.map(async (channel) => {
       try {
-        const [allCommentsNum, commentsToDelete] = await detectProcess(channel);
+        const [allCommentsNum, commentsToDelete] = await detectProcess(
+          channel,
+          automationLog.id
+        );
         return {
           success: true,
           accountId: channel.channelId,
@@ -66,6 +69,7 @@ export async function GET(request: Request) {
           removeCommentIds: commentsToDelete.map((comment) => comment.id),
         };
       } catch (error) {
+        console.error(error);
         return { success: false, accountId: channel.channelId };
       }
     })
@@ -120,7 +124,8 @@ export async function GET(request: Request) {
 }
 
 const detectProcess = async (
-  channel: YoutubeAccount
+  channel: YoutubeAccount,
+  automationLogId: string
 ): Promise<[number, CommentThreadsBase[]]> => {
   const client = await getYouTubeClient(channel);
 
@@ -173,6 +178,7 @@ const detectProcess = async (
         textOriginal,
         publishedAt,
         status: CommentStatus.SpamPendingDelete,
+        detectRunId: automationLogId,
       })
     ),
     skipDuplicates: true,

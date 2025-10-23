@@ -6,17 +6,21 @@ enum CommentStatus {
 }
 
 model Comment {
-    id                String         @id
-    youtubeAccount    YoutubeAccount @relation(fields: [channelId], references: [channelId])
-    channelId         String
-    videoId           String         @map("video_id")
-    authorDisplayName String         @map("author_display_name")
-    textDisplay       String         @map("text_display")
-    textOriginal      String         @map("text_original")
-    publishedAt       DateTime       @map("published_at")
+    id                String        @id
+    channelId         String        @map("channel_id")
+    videoId           String        @map("video_id")
+    authorDisplayName String        @map("author_display_name")
+    textDisplay       String        @map("text_display")
+    textOriginal      String        @map("text_original")
+    publishedAt       DateTime      @map("published_at")
     status            CommentStatus
-    createdAt         DateTime       @default(now()) @map("created_at")
-    deletedAt         DateTime?      @map("deleted_at")
+    detectRunId       String?       @map("detect_run_id")
+    deleteRunId       String?       @map("delete_run_id")
+    createdAt         DateTime      @default(now()) @map("created_at")
+
+    detectRun      AutomationRunLog? @relation(name: "comment_detect_run", fields: [detectRunId], references: [id], onDelete: Cascade)
+    deleteRun      AutomationRunLog? @relation(name: "comment_delete_run", fields: [deleteRunId], references: [id], onDelete: Cascade)
+    youtubeAccount YoutubeAccount    @relation(fields: [channelId], references: [channelId])
 
     @@map("comments")
 }
