@@ -40,6 +40,7 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
+            You are a senior developer.
             Please review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
