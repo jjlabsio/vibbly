@@ -23,6 +23,24 @@ type FailResult = {
   accountId: string;
 };
 
+type DeletionResult = DeletionSuccess | DeletionFail;
+type DeletionSuccess = {
+  success: true;
+  accountId: string;
+  userId: string;
+  commentIds: string[];
+};
+type DeletionFail = {
+  success: false;
+  accountId: string;
+};
+
+const isDeletionSuccess = (
+  result: DeletionResult
+): result is DeletionSuccess => {
+  return result.success === true;
+};
+
 export async function GET(request: Request) {
   const env = process.env.NODE_ENV;
 
@@ -38,6 +56,35 @@ export async function GET(request: Request) {
   const commentMap = await getPendingDeleteCommentsMap();
   const externalIds = Array.from(commentMap.keys());
 
+  const deletionResults: DeletionResult[] = await Promise.all(
+    externalIds.map(async (externalId) => {
+      const entry = commentMap.get(externalId);
+      if (!entry) {
+        return {
+          success: false,
+          accountId: externalId,
+        };
+      }
+
+      try {
+        await deleteComments(entry.account, entry.commentIds);
+
+        return {
+          success: true,
+          accountId: externalId,
+          userId: entry.account.userId,
+          commentIds: entry.commentIds,
+        };
+      } catch (error) {
+        console.error(error);
+        return {
+          success: false,
+          accountId: externalId,
+        };
+      }
+    })
+  );
+
   const { automationLog, summary } = await prisma.$transaction(
     async (tx) => {
       // 1. log 생성
@@ -50,47 +97,37 @@ export async function GET(request: Request) {
 
       // 2. 댓글 삭제
       const results: Result[] = await Promise.all(
-        externalIds.map(async (externalId) => {
-          const entry = commentMap.get(externalId);
-          if (!entry) {
-            return {
-              success: false,
-              accountId: externalId,
-            };
-          }
-
-          const { account, commentIds } = entry;
-
-          try {
-            await deleteComments(account, commentIds);
-
-            await tx.comment.updateMany({
-              where: {
-                id: {
-                  in: commentIds,
+        deletionResults
+          .filter(isDeletionSuccess)
+          .map(async ({ accountId, userId, commentIds }) => {
+            try {
+              await tx.comment.updateMany({
+                where: {
+                  id: {
+                    in: commentIds,
+                  },
                 },
-              },
-              data: {
-                status: CommentStatus.Deleted,
-                deleteRunId: automationLog.id,
-              },
-            });
+                data: {
+                  status: CommentStatus.Deleted,
+                  deleteRunId: automationLog.id,
+                },
+              });
 
-            return {
-              success: true,
-              accountId: externalId,
-              userId: account.userId,
-              deletedCommentNum: commentIds.length,
-              deletedCommentIds: commentIds,
-            };
-          } catch (error) {
-            console.error(error);
-            return {
-              success: false,
-              accountId: externalId,
-            };
-          }
-        })
+              return {
+                success: true,
+                accountId: accountId,
+                userId: userId,
+                deletedCommentNum: commentIds.length,
+                deletedCommentIds: commentIds,
+              };
+            } catch (error) {
+              console.error(error);
+              return {
+                success: false,
+                accountId: accountId,
+              };
+            }
+          })
       );
 
       // 3. metrics 저장
@@ -146,7 +183,7 @@ export async function GET(request: Request) {
     },
     {
       maxWait: 1000 * 5, // 5초
-      timeout: 1000 * 60 * 5, // 10분
+      timeout: 1000 * 60 * 2, // 2분
     }
   );
 
