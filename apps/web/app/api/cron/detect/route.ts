@@ -41,6 +41,17 @@ export async function GET(request: Request) {
   }
 
   const socialAccounts = await prisma.socialAccount.findMany();
+  const detectedComments = await Promise.all(
+    socialAccounts.map(async (account) => {
+      const [allCommentsCount, commentsToDelete] =
+        await detectComments(account);
+      return {
+        account,
+        allCommentsCount,
+        commentsToDelete,
+      };
+    })
+  );
 
   const { automationLog, summary } = await prisma.$transaction(
     async (tx) => {
@@ -55,49 +66,48 @@ export async function GET(request: Request) {
       // 2. 각 계정별 댓글 탐지
       // Todo: 채널이 너무 많아지면 p-limit 적용 추후에 고려
       const results: Result[] = await Promise.all(
-        socialAccounts.map(async (account) => {
-          try {
-            const [allCommentsNum, commentsToDelete] =
-              await detectComments(account);
-            // 검사 후 삭제 예정 큐에 추가
-            await tx.comment.createMany({
-              data: commentsToDelete.map(
-                ({
-                  id,
-                  channelId,
-                  videoId,
-                  authorDisplayName,
-                  textDisplay,
-                  textOriginal,
-                  publishedAt,
-                }) => ({
-                  id,
-                  socialAccountExternalId: channelId,
-                  contentId: videoId,
-                  authorDisplayName,
-                  textDisplay,
-                  textOriginal,
-                  publishedAt,
-                  status: CommentStatus.SpamPendingDelete,
-                  detectRunId: automationLog.id,
-                })
-              ),
-              skipDuplicates: true,
-            });
+        detectedComments.map(
+          async ({ account, allCommentsCount, commentsToDelete }) => {
+            try {
+              await tx.comment.createMany({
+                data: commentsToDelete.map(
+                  ({
+                    id,
+                    channelId,
+                    videoId,
+                    authorDisplayName,
+                    textDisplay,
+                    textOriginal,
+                    publishedAt,
+                  }) => ({
+                    id,
+                    socialAccountExternalId: channelId,
+                    contentId: videoId,
+                    authorDisplayName,
+                    textDisplay,
+                    textOriginal,
+                    publishedAt,
+                    status: CommentStatus.SpamPendingDelete,
+                    detectRunId: automationLog.id,
+                  })
+                ),
+                skipDuplicates: true,
+              });
 
-            return {
-              success: true,
-              accountId: account.externalId,
-              userId: account.userId,
-              detectionCount: allCommentsNum,
-              removeCommentNum: commentsToDelete.length,
-              removeCommentIds: commentsToDelete.map((comment) => comment.id),
-            };
-          } catch (error) {
-            console.error(error);
-            return { success: false, accountId: account.externalId };
+              return {
+                success: true,
+                accountId: account.externalId,
+                userId: account.userId,
+                detectionCount: allCommentsCount,
+                removeCommentNum: commentsToDelete.length,
+                removeCommentIds: commentsToDelete.map((comment) => comment.id),
+              };
+            } catch (error) {
+              console.error(error);
+              return { success: false, accountId: account.externalId };
+            }
           }
-        })
+        )
       );
 
       // 3. metrics 저장
@@ -168,7 +178,7 @@ export async function GET(request: Request) {
     },
     {
       maxWait: 1000 * 5, // 5초
-      timeout: 1000 * 60 * 10, // 10분
+      timeout: 1000 * 60 * 2, // 10분
     }
   );
 
