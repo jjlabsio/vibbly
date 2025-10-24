@@ -31,26 +31,19 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return Response.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return Response.json({ error: "User not found" }, { status: 404 });
     }
 
     return Response.json(user);
   } catch (error) {
     console.error("Failed to fetch user", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 const schema = zfd.formData({
   name: zfd.text(),
   email: zfd.text(),
-  image: zfd.text(),
 });
 
 export async function POST(req: Request) {
@@ -64,27 +57,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, email, image } = dataParse.data;
+    const { name, email } = dataParse.data;
 
     const res = await prisma.user.create({
       data: {
         name,
         email,
-        image,
-        authAccounts: {
-          create: {
-            provider: "google",
-          },
-        },
       },
     });
 
     return Response.json(res, { status: 201 });
   } catch (error) {
     console.error("Failed to create user", error);
-    return Response.json(
-      { error: "Unable to create user" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Unable to create user" }, { status: 500 });
   }
 }

@@ -25,16 +25,16 @@ export const getMyChannels = async () => {
       throw Error("user가 데이터베이스에 존재하지 않습니다");
     }
 
-    const dbAccounts = await prisma.youtubeAccount.findMany({
+    const socialAccounts = await prisma.socialAccount.findMany({
       where: { userId: user.id },
     });
     const accounts: Channel[] = [];
 
-    for (const account of dbAccounts) {
-      const client = await getYouTubeClient(account);
+    for (const socialAccount of socialAccounts) {
+      const client = await getYouTubeClient(socialAccount);
       const channels = await client.channels.list({
         part: ["id", "snippet"],
-        id: [account.channelId],
+        id: [socialAccount.externalId],
       });
       const channel = channels.data.items![0] as youtube_v3.Schema$Channel;
       const channelData: Channel = {
@@ -80,13 +80,13 @@ export const getMyVideos = async (): Promise<Content[]> => {
       throw Error("user가 데이터베이스에 존재하지 않습니다");
     }
 
-    const dbAccounts = await prisma.youtubeAccount.findMany({
+    const socialAccounts = await prisma.socialAccount.findMany({
       where: { userId: user.id },
     });
     const allContents: Content[] = [];
 
-    for (const account of dbAccounts) {
-      const client = await getYouTubeClient(account);
+    for (const socialAccount of socialAccounts) {
+      const client = await getYouTubeClient(socialAccount);
       const channelList = await client.channels.list({
         part: ["contentDetails", "snippet"],
         mine: true,
@@ -99,7 +99,7 @@ export const getMyVideos = async (): Promise<Content[]> => {
       const videos = await getAllVideos(
         client,
         uploadPlaylist,
-        account.channelId,
+        socialAccount.externalId,
         channelName
       );
 

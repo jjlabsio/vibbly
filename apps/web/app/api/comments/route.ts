@@ -1,40 +1,42 @@
-import prisma from "@/lib/prisma";
-import { getYouTubeClient } from "@/lib/youtube-account";
-import { NextRequest, NextResponse } from "next/server";
+// 추후에 쓸 수 있는 기능
 
-export async function DELETE(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const userId = searchParams.get("userId");
-  const commentId = searchParams.get("commentId");
+// import prisma from "@/lib/prisma";
+// import { getYouTubeClient } from "@/lib/youtube-account";
+// import { NextRequest, NextResponse } from "next/server";
 
-  if (!userId)
-    return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+// export async function DELETE(request: NextRequest) {
+//   const searchParams = request.nextUrl.searchParams;
+//   const userId = searchParams.get("userId");
+//   const commentId = searchParams.get("commentId");
 
-  if (!commentId)
-    return NextResponse.json({ error: "Missing commentId" }, { status: 400 });
+//   if (!userId)
+//     return NextResponse.json({ error: "Missing userId" }, { status: 400 });
 
-  try {
-    const channel = await prisma.youtubeAccount.findUnique({
-      where: {
-        channelId: userId,
-      },
-    });
+//   if (!commentId)
+//     return NextResponse.json({ error: "Missing commentId" }, { status: 400 });
 
-    if (!channel) {
-      return new Response("No channel matched", { status: 404 });
-    }
+//   try {
+//     const channel = await prisma.youtubeAccount.findUnique({
+//       where: {
+//         channelId: userId,
+//       },
+//     });
 
-    const youtubeClient = await getYouTubeClient(channel);
-    // comments.delete는 자신이 작성한 댓글만 삭제 가능
-    const result = await youtubeClient.comments.setModerationStatus({
-      id: [commentId],
-      moderationStatus: "rejected",
-    });
+//     if (!channel) {
+//       return new Response("No channel matched", { status: 404 });
+//     }
 
-    return NextResponse.json(result.data);
-  } catch (error) {
-    console.error(error);
+//     const youtubeClient = await getYouTubeClient(channel);
+//     // comments.delete는 자신이 작성한 댓글만 삭제 가능
+//     const result = await youtubeClient.comments.setModerationStatus({
+//       id: [commentId],
+//       moderationStatus: "rejected",
+//     });
 
-    return NextResponse.json({ error: "YoutubeClient error" }, { status: 400 });
-  }
-}
+//     return NextResponse.json(result.data);
+//   } catch (error) {
+//     console.error(error);
+
+//     return NextResponse.json({ error: "YoutubeClient error" }, { status: 400 });
+//   }
+// }
