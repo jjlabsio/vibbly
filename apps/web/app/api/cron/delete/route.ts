@@ -201,13 +201,25 @@ const BATCH_SIZE = 100;
 
 const deleteComments = async (account: SocialAccount, commentIds: string[]) => {
   const client = await getYouTubeClient(account);
+  const failedBatches: string[][] = [];
 
   for (let i = 0; i < commentIds.length; i += BATCH_SIZE) {
     const batch = commentIds.slice(i, i + BATCH_SIZE);
-    await client.comments.setModerationStatus({
-      id: batch,
-      moderationStatus: "rejected",
-    });
+    try {
+      await client.comments.setModerationStatus({
+        id: batch,
+        moderationStatus: "rejected",
+      });
+    } catch (error) {
+      console.error(`Failed to delete batch ${i}-${i + BATCH_SIZE}:`, error);
+      failedBatches.push(batch);
+    }
+  }
+
+  if (failedBatches.length > 0) {
+    throw new Error(
+      `Failed to delete ${failedBatches.flat().length} comments in ${failedBatches.length} batches`
+    );
   }
 };
 
