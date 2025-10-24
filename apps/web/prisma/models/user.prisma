@@ -2,13 +2,13 @@ model User {
     id        String   @id @default(cuid())
     email     String   @unique
     name      String
-    image     String
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    authAccounts               AuthAccount[]
+    // authAccounts               AuthAccount[]
     keywords                   Keyword[]
     automationRunAccountMetric AutomationRunAccountMetric[]
+    socialAccount              SocialAccount[]
 
     @@map("users")
 }
@@ -17,12 +17,15 @@ enum Provider {
     google
 }
 
-model AuthAccount {
-    id       String   @id @default(cuid())
-    user     User     @relation(fields: [userId], references: [id])
-    userId   String   @map("user_id")
-    provider Provider
+// SNS 로그인을 구글 로그인 외의 옵션을 열게 되면 관리가 필요함
+// 현재는 구글 로그인만 구현하기 때문에 나중에 처리하는 것으로
 
-    @@unique([userId, provider])
-    @@map("auth_accounts")
-}
+// model AuthAccount {
+//     id       String   @id @default(cuid())
+//     user     User     @relation(fields: [userId], references: [id])
+//     userId   String   @map("user_id")
+//     provider Provider
+
+//     @@unique([userId, provider])
+//     @@map("auth_accounts")
+// }

@@ -35,7 +35,6 @@ export const nextAuth = NextAuth({
           dbUser = await _signUp({
             email: user.email as string,
             name: user.name as string,
-            image: user.image as string,
           });
         }
 
@@ -133,11 +132,10 @@ const _isExist = async (email: string) => {
   }
 };
 
-const _signUp = async ({ email, name, image }: Prisma.UserCreateInput) => {
+const _signUp = async ({ email, name }: Prisma.UserCreateInput) => {
   const formData = new FormData();
   formData.append("email", email);
   formData.append("name", name);
-  formData.append("image", image);
 
   const { data } = await serverApi.post<User>("/api/users", formData, {
     headers: {

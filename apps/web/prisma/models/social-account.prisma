@@ -1,0 +1,47 @@
+// model YoutubeAccount {
+//     channelId    String   @id @map("channel_id")
+//     userId       String   @map("user_id")
+//     accessToken  String   @map("access_token")
+//     refreshToken String   @map("refresh_token")
+//     //  access_token 만료 시각(ms)
+//     expiryDate   BigInt?  @map("expiry_date")
+//     createdAt    DateTime @default(now()) @map("created_at")
+//     updatedAt    DateTime @updatedAt @map("updated_at")
+
+//     comments                   Comment[]
+//     automationRunAccountMetric AutomationRunAccountMetric[]
+
+//     @@map("youtube_accounts")
+// }
+
+model SocialAccount {
+    id         String   @id @default(cuid())
+    userId     String   @map("user_id")
+    platform   Platform
+    externalId String   @unique @map("external_id")
+    createdAt  DateTime @default(now()) @map("created_at")
+    updatedAt  DateTime @updatedAt @map("updated_at")
+
+    user                       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    SocialToken                SocialToken?
+    automationRunAccountMetric AutomationRunAccountMetric[]
+    comment                    Comment[]
+
+    @@map("social_accounts")
+}
+
+model SocialToken {
+    socialAccountId String  @id
+    accessToken     String  @map("access_token")
+    refreshToken    String  @map("refresh_token")
+    expiryDate      BigInt? @map("expiry_date") //  access_token 만료 시각(ms)
+
+    socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+    @@map("social_tokens")
+}
+
+enum Platform {
+    YOUTUBE
+    INSTAGRAM
+}

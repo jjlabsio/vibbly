@@ -25,10 +25,10 @@ model AutomationRunLog {
 }
 
 model AutomationRunAccountMetric {
-    id              String @id @default(cuid())
-    runId           String @map("run_id")
-    socialAccountId String @map("social_account_id")
-    userId          String @map("user_id")
+    id                      String @id @default(cuid())
+    runId                   String @map("run_id")
+    socialAccountExternalId String @map("social_account_external_id")
+    userId                  String @map("user_id")
 
     detectionCount Int? @map("detection_count")
     newSpamCount   Int? @map("new_spam_count")
@@ -36,9 +36,9 @@ model AutomationRunAccountMetric {
 
     createdAt DateTime @default(now()) @map("created_at")
 
-    run     AutomationRunLog @relation(fields: [runId], references: [id], onDelete: Cascade)
-    channel YoutubeAccount   @relation(fields: [socialAccountId], references: [channelId])
-    user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    run           AutomationRunLog @relation(fields: [runId], references: [id], onDelete: Cascade)
+    socialAccount SocialAccount    @relation(fields: [socialAccountExternalId], references: [externalId], onDelete: Cascade)
+    user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("automation_run_account_metrics")
 }

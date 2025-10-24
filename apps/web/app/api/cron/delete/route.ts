@@ -3,6 +3,7 @@ import {
   AutomationPlan,
   AutomationRunStatus,
   CommentStatus,
+  SocialAccount,
 } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { getYouTubeClient } from "@/lib/youtube-account";
@@ -34,141 +35,169 @@ export async function GET(request: Request) {
     }
   }
 
-  // 1. start run log
-  const automationLog = await prisma.automationRunLog.create({
-    data: {
-      job: AutomationJob.DELETE,
-      plan: AutomationPlan.BASIC,
+  const commentMap = await getPendingDeleteCommentsMap();
+  const externalIds = Array.from(commentMap.keys());
+
+  const { automationLog, summary } = await prisma.$transaction(
+    async (tx) => {
+      // 1. log 생성
+      const automationLog = await tx.automationRunLog.create({
+        data: {
+          job: AutomationJob.DELETE,
+          plan: AutomationPlan.BASIC,
+        },
+      });
+
+      // 2. 댓글 삭제
+      const results: Result[] = await Promise.all(
+        externalIds.map(async (externalId) => {
+          const entry = commentMap.get(externalId);
+          if (!entry) {
+            return {
+              success: false,
+              accountId: externalId,
+            };
+          }
+
+          const { account, commentIds } = entry;
+
+          try {
+            await deleteComments(account, commentIds);
+
+            await tx.comment.updateMany({
+              where: {
+                id: {
+                  in: commentIds,
+                },
+              },
+              data: {
+                status: CommentStatus.Deleted,
+                deleteRunId: automationLog.id,
+              },
+            });
+
+            return {
+              success: true,
+              accountId: externalId,
+              userId: account.userId,
+              deletedCommentNum: commentIds.length,
+              deletedCommentIds: commentIds,
+            };
+          } catch (error) {
+            console.error(error);
+            return {
+              success: false,
+              accountId: externalId,
+            };
+          }
+        })
+      );
+
+      // 3. metrics 저장
+      await tx.automationRunAccountMetric.createMany({
+        data: results
+          .filter((result) => result.success)
+          .map((result) => ({
+            runId: automationLog.id,
+            socialAccountExternalId: result.accountId,
+            userId: result.userId,
+            deletionCount: result.deletedCommentNum,
+          })),
+      });
+
+      // 4. log 업데이트
+      const completedAt = new Date();
+      const durationMs =
+        completedAt.getTime() - automationLog.startedAt.getTime();
+      const deletionCount = results
+        .filter((result) => result.success)
+        .reduce((acc, cur) => acc + cur.deletedCommentNum, 0);
+
+      await tx.automationRunLog.update({
+        where: {
+          id: automationLog.id,
+        },
+        data: {
+          status: AutomationRunStatus.SUCCESS,
+          completedAt,
+          durationMs,
+          deletionCount,
+        },
+      });
+
+      return {
+        automationLog,
+        summary: {
+          deletionCount,
+        },
+      };
+    },
+    {
+      maxWait: 1000 * 5, // 5초
+      timeout: 1000 * 60 * 10, // 10분
+    }
+  );
+
+  return Response.json({
+    success: true,
+    runId: automationLog.id,
+    summary: {
+      totalAccounts: externalIds.length,
+      deletionCount: summary.deletionCount,
     },
   });
+}
 
-  // 2. delete
+const deleteComments = async (account: SocialAccount, commentIds: string[]) => {
+  const client = await getYouTubeClient(account);
+  await client.comments.setModerationStatus({
+    id: commentIds,
+    moderationStatus: "rejected",
+  });
+};
+
+const getPendingDeleteCommentsMap = async () => {
   const pendingDeleteComments = await prisma.comment.findMany({
     where: {
       status: CommentStatus.SpamPendingDelete,
     },
     select: {
       id: true,
-      channelId: true,
+      socialAccountExternalId: true,
     },
   });
 
-  const commentMap = new Map<string, string[]>();
+  const uniqueExternalIds = [
+    ...new Set(
+      pendingDeleteComments.map((comment) => comment.socialAccountExternalId)
+    ),
+  ];
 
-  pendingDeleteComments.forEach(({ id, channelId }) => {
-    if (!commentMap.has(channelId)) {
-      commentMap.set(channelId, []);
-    }
-
-    commentMap.get(channelId)!.push(id);
-  });
-
-  const channelIds = Array.from(commentMap.keys());
-
-  const results: Result[] = await Promise.all(
-    channelIds.map(async (channelId) => {
-      const commentIds = commentMap.get(channelId);
-      if (!commentIds) {
-        return {
-          success: false,
-          accountId: channelId,
-        };
-      }
-
-      try {
-        const { userId } = await deleteProcess(
-          channelId,
-          commentIds,
-          automationLog.id
-        );
-
-        return {
-          success: true,
-          accountId: channelId,
-          userId,
-          deletedCommentNum: commentIds.length,
-          deletedCommentIds: commentIds,
-        };
-      } catch (error) {
-        console.error(error);
-        return {
-          success: false,
-          accountId: channelId,
-        };
-      }
-    })
-  );
-
-  // 3. account metric log
-  await prisma.automationRunAccountMetric.createMany({
-    data: results
-      .filter((result) => result.success)
-      .map((result) => ({
-        runId: automationLog.id,
-        socialAccountId: result.accountId,
-        userId: result.userId,
-        deletionCount: result.deletedCommentNum,
-      })),
-  });
-
-  // 4. complete run log
-  const completedAt = new Date();
-  const durationMs = completedAt.getTime() - automationLog.startedAt.getTime();
-  const deletionCount = results
-    .filter((result) => result.success)
-    .reduce((acc, cur) => acc + cur.deletedCommentNum, 0);
-
-  await prisma.automationRunLog.update({
+  const socialAccounts = await prisma.socialAccount.findMany({
     where: {
-      id: automationLog.id,
-    },
-    data: {
-      status: AutomationRunStatus.SUCCESS,
-      completedAt,
-      durationMs,
-      deletionCount,
-    },
-  });
-
-  return Response.json(results);
-}
-
-const deleteProcess = async (
-  channelId: string,
-  commentIds: string[],
-  automationLogId: string
-) => {
-  const channel = await prisma.youtubeAccount.findUnique({
-    where: {
-      channelId: channelId,
-    },
-  });
-  if (!channel) {
-    throw Error("There is no matched channel");
-  }
-
-  const client = await getYouTubeClient(channel);
-  await client.comments.setModerationStatus({
-    id: commentIds,
-    moderationStatus: "rejected",
-  });
-
-  const deletedAt = new Date();
-  const result = await prisma.comment.updateMany({
-    where: {
-      id: {
-        in: commentIds,
+      externalId: {
+        in: uniqueExternalIds,
       },
     },
-    data: {
-      status: CommentStatus.Deleted,
-      deleteRunId: automationLogId,
-    },
   });
-  result.count;
 
-  return {
-    userId: channel.userId,
-    deletedAt,
-  };
+  const commentMap = new Map<
+    string,
+    { account: SocialAccount; commentIds: string[] }
+  >();
+  socialAccounts.forEach((account) => {
+    commentMap.set(account.externalId, {
+      account,
+      commentIds: [],
+    });
+  });
+
+  pendingDeleteComments.forEach(({ id, socialAccountExternalId }) => {
+    const entry = commentMap.get(socialAccountExternalId);
+    if (entry) {
+      entry.commentIds.push(id);
+    }
+  });
+
+  return commentMap;
 };

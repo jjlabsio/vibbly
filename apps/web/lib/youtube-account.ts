@@ -1,10 +1,21 @@
 import { google } from "googleapis";
-import db from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { getOauth2Client } from "./oauth";
-import { YoutubeAccount } from "@/generated/prisma";
+import { SocialAccount } from "@/generated/prisma";
 
-export async function getYouTubeClient(channel: YoutubeAccount) {
-  const { accessToken, refreshToken, expiryDate, channelId } = channel;
+export async function getYouTubeClient(channel: SocialAccount) {
+  const socialToken = await prisma.socialToken.findUnique({
+    where: {
+      socialAccountId: channel.id,
+    },
+  });
+
+  if (!socialToken) {
+    throw Error("There is no matched socialToken");
+  }
+
+  const { accessToken, refreshToken, expiryDate, socialAccountId } =
+    socialToken;
 
   const oauth2Client = getOauth2Client();
 
@@ -17,8 +28,8 @@ export async function getYouTubeClient(channel: YoutubeAccount) {
   // access_token 자동 갱신
   oauth2Client.on("tokens", async (tokens) => {
     if (tokens.access_token) {
-      await db.youtubeAccount.update({
-        where: { channelId: channelId },
+      await prisma.socialToken.update({
+        where: { socialAccountId },
         data: {
           accessToken: tokens.access_token,
           expiryDate: tokens.expiry_date ?? null,

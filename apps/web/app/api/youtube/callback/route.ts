@@ -3,6 +3,7 @@ import { google } from "googleapis";
 import db from "@/lib/prisma";
 import { auth } from "@/auth";
 import { getOauth2Client } from "@/lib/oauth";
+import { Platform } from "@/generated/prisma";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -38,11 +39,25 @@ export async function GET(req: NextRequest) {
   if (!channelId || !tokens.refresh_token)
     return NextResponse.json({ error: "Missing data" }, { status: 400 });
 
-  // DB 저장
-  await db.youtubeAccount.create({
+  const socialAccount = await db.socialAccount.create({
     data: {
-      channelId: channelId,
-      userId: user.id,
+      platform: Platform.YOUTUBE,
+      externalId: channelId,
+      user: {
+        connect: {
+          id: user.id,
+        },
+      },
+    },
+  });
+
+  await db.socialToken.create({
+    data: {
+      socialAccount: {
+        connect: {
+          id: socialAccount.id,
+        },
+      },
       accessToken: tokens.access_token!,
       refreshToken: tokens.refresh_token!,
       expiryDate: tokens.expiry_date ?? null,

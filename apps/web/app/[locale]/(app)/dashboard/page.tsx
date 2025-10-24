@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@vibbly/ui/components/table";
+import { YoutubeAccount } from "@/components/youtube-account";
 
 type KpiMetric = {
   id: string;
@@ -133,9 +134,27 @@ const EXECUTION_STATUS = {
   },
   nextRun: "2024-06-14 10:00 예정",
   recentRuns: [
-    { time: "09:45", status: "success", detections: 206, deletions: 188, duration: "02:14" },
-    { time: "08:45", status: "warning", detections: 198, deletions: 170, duration: "02:28" },
-    { time: "07:45", status: "success", detections: 186, deletions: 172, duration: "02:12" },
+    {
+      time: "09:45",
+      status: "success",
+      detections: 206,
+      deletions: 188,
+      duration: "02:14",
+    },
+    {
+      time: "08:45",
+      status: "warning",
+      detections: 198,
+      deletions: 170,
+      duration: "02:28",
+    },
+    {
+      time: "07:45",
+      status: "success",
+      detections: 186,
+      deletions: 172,
+      duration: "02:12",
+    },
   ] satisfies ExecutionRun[],
 };
 
@@ -191,7 +210,8 @@ const ALERTS: AlertItem[] = [
   {
     id: "deletion-failed",
     title: "자동 삭제 실패 2건",
-    description: "Growth Playbook에서 API 제한으로 일부 댓글 삭제가 지연되었습니다.",
+    description:
+      "Growth Playbook에서 API 제한으로 일부 댓글 삭제가 지연되었습니다.",
     severity: "critical",
     timestamp: "23분 전",
   },
@@ -330,6 +350,7 @@ export default async function Page() {
         <p className="text-sm text-muted-foreground">
           자동 탐지·삭제 현황을 확인하고 위험 시그널을 빠르게 처리하세요.
         </p>
+        <YoutubeAccount />
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -365,7 +386,9 @@ export default async function Page() {
         <Card className="gap-0">
           <CardHeader>
             <CardTitle>최근 14일 탐지 · 삭제 추세</CardTitle>
-            <CardDescription>일간 자동 탐지와 삭제 누적을 비교합니다.</CardDescription>
+            <CardDescription>
+              일간 자동 탐지와 삭제 누적을 비교합니다.
+            </CardDescription>
             <CardAction>
               <Button variant="outline" size="sm">
                 기간 선택 (더미)
@@ -419,7 +442,10 @@ export default async function Page() {
               </div>
               <div className="grid grid-cols-7 gap-3 sm:grid-cols-14">
                 {TREND_DATA.map((day) => (
-                  <div key={day.date} className="flex flex-col items-center gap-2">
+                  <div
+                    key={day.date}
+                    className="flex flex-col items-center gap-2"
+                  >
                     <div className="flex h-28 w-full items-end gap-1">
                       <div
                         className="flex-1 rounded-sm bg-primary/80"
@@ -481,7 +507,9 @@ export default async function Page() {
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-foreground">최근 실행 로그</p>
+              <p className="text-sm font-medium text-foreground">
+                최근 실행 로그
+              </p>
               <ul className="space-y-2 text-sm">
                 {EXECUTION_STATUS.recentRuns.map((run) => (
                   <li
@@ -500,8 +528,8 @@ export default async function Page() {
                         {run.status === "success"
                           ? "정상"
                           : run.status === "warning"
-                          ? "주의"
-                          : "오류"}
+                            ? "주의"
+                            : "오류"}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -556,8 +584,8 @@ export default async function Page() {
                         {channel.status === "healthy"
                           ? "정상"
                           : channel.status === "warning"
-                          ? "주의"
-                          : "비활성"}
+                            ? "주의"
+                            : "비활성"}
                       </span>
                     </TableCell>
                     <TableCell className="text-right text-foreground">
@@ -581,7 +609,11 @@ export default async function Page() {
             </Table>
             <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
               <span>오늘 기준 더미 데이터입니다.</span>
-              <Button variant="ghost" size="sm" className="self-start px-0 text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="self-start px-0 text-xs"
+              >
                 전체 채널 관리 (더미)
               </Button>
             </div>
@@ -613,8 +645,8 @@ export default async function Page() {
                           {alert.severity === "critical"
                             ? "긴급"
                             : alert.severity === "warning"
-                            ? "주의"
-                            : "정보"}
+                              ? "주의"
+                              : "정보"}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {alert.timestamp}
@@ -643,7 +675,8 @@ export default async function Page() {
           <CardHeader>
             <CardTitle>최근 스팸 활동</CardTitle>
             <CardDescription>
-              자동 삭제된 댓글 스니펫과 규칙을 확인하세요. 복구는 지원되지 않습니다.
+              자동 삭제된 댓글 스니펫과 규칙을 확인하세요. 복구는 지원되지
+              않습니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -679,9 +712,7 @@ export default async function Page() {
         <Card className="gap-0">
           <CardHeader>
             <CardTitle>시스템 스냅샷</CardTitle>
-            <CardDescription>
-              연결 상태와 감지 설정 요약입니다.
-            </CardDescription>
+            <CardDescription>연결 상태와 감지 설정 요약입니다.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             {SNAPSHOT.map((metric) => (
@@ -698,7 +729,11 @@ export default async function Page() {
                 ) : null}
               </div>
             ))}
-            <Button variant="ghost" size="sm" className="justify-start px-0 text-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="justify-start px-0 text-sm"
+            >
               설정으로 이동 (더미)
             </Button>
           </CardContent>
