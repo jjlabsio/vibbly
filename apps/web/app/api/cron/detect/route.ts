@@ -178,7 +178,7 @@ export async function GET(request: Request) {
     },
     {
       maxWait: 1000 * 5, // 5초
-      timeout: 1000 * 60 * 2, // 10분
+      timeout: 1000 * 60 * 2, // 2분
     }
   );
 
