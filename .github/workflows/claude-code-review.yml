@@ -49,7 +49,10 @@ jobs:
             - Test coverage
             - Use korean
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Use the repository's CLAUDE.md for guidance on style and conventions.
+            When reviewing frontend code (React, TypeScript, UI components), also refer to .ai/prompts/frontend-guideline.md for frontend-specific best practices including readability, predictability, cohesion, and coupling principles.
+
+            Be constructive and helpful in your feedback.
 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
 
