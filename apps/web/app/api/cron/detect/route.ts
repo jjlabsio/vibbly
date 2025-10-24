@@ -127,21 +127,16 @@ export async function GET(request: Request) {
       const completedAt = new Date();
       const durationMs =
         completedAt.getTime() - automationLog.startedAt.getTime();
-      const [detectionCount, newSpamCount] = results
-        .filter((result) => result.success)
-        .reduce(
-          (acc, cur) => {
-            const [accDetectionCount, accNewSpamCount] = acc;
-            const curDetectionCount = cur.detectionCount;
-            const curNewSpamCount = cur.removeCommentNum;
 
-            return [
-              accDetectionCount + curDetectionCount,
-              accNewSpamCount + curNewSpamCount,
-            ];
-          },
-          [0, 0]
-        );
+      const successResults = results.filter((result) => result.success);
+      const detectionCount = successResults.reduce(
+        (sum, result) => sum + result.detectionCount,
+        0
+      );
+      const newSpamCount = successResults.reduce(
+        (sum, result) => sum + result.removeCommentNum,
+        0
+      );
 
       const failedAccounts = results.filter((result) => !result.success);
       const status =
