@@ -146,7 +146,7 @@ export async function GET(request: Request) {
     },
     {
       maxWait: 1000 * 5, // 5초
-      timeout: 1000 * 60 * 10, // 10분
+      timeout: 1000 * 60 * 5, // 10분
     }
   );
 
@@ -160,12 +160,18 @@ export async function GET(request: Request) {
   });
 }
 
+const BATCH_SIZE = 100;
+
 const deleteComments = async (account: SocialAccount, commentIds: string[]) => {
   const client = await getYouTubeClient(account);
-  await client.comments.setModerationStatus({
-    id: commentIds,
-    moderationStatus: "rejected",
-  });
+
+  for (let i = 0; i < commentIds.length; i += BATCH_SIZE) {
+    const batch = commentIds.slice(i, i + BATCH_SIZE);
+    await client.comments.setModerationStatus({
+      id: batch,
+      moderationStatus: "rejected",
+    });
+  }
 };
 
 const getPendingDeleteCommentsMap = async () => {
