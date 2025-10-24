@@ -113,12 +113,24 @@ export async function GET(request: Request) {
         .filter((result) => result.success)
         .reduce((acc, cur) => acc + cur.deletedCommentNum, 0);
 
+      const failedAccounts = results.filter((result) => !result.success);
+      const status =
+        failedAccounts.length > 0
+          ? failedAccounts.length === results.length
+            ? AutomationRunStatus.ERROR
+            : AutomationRunStatus.WARNING
+          : AutomationRunStatus.SUCCESS;
+
       await tx.automationRunLog.update({
         where: {
           id: automationLog.id,
         },
         data: {
-          status: AutomationRunStatus.SUCCESS,
+          status,
+          errorMessage:
+            failedAccounts.length > 0
+              ? `${failedAccounts.length} accounts failed`
+              : null,
           completedAt,
           durationMs,
           deletionCount,

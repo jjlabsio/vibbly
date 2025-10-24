@@ -133,12 +133,24 @@ export async function GET(request: Request) {
           [0, 0]
         );
 
+      const failedAccounts = results.filter((result) => !result.success);
+      const status =
+        failedAccounts.length > 0
+          ? failedAccounts.length === results.length
+            ? AutomationRunStatus.ERROR
+            : AutomationRunStatus.WARNING
+          : AutomationRunStatus.SUCCESS;
+
       await tx.automationRunLog.update({
         where: {
           id: automationLog.id,
         },
         data: {
-          status: AutomationRunStatus.SUCCESS,
+          status,
+          errorMessage:
+            failedAccounts.length > 0
+              ? `${failedAccounts.length} accounts failed`
+              : null,
           completedAt,
           durationMs,
           detectionCount,
