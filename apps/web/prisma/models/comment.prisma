@@ -22,5 +22,7 @@ model Comment {
     deleteRun     AutomationRunLog? @relation(name: "comment_delete_run", fields: [deleteRunId], references: [id], onDelete: Cascade)
     socialAccount SocialAccount     @relation(fields: [socialAccountExternalId], references: [externalId])
 
+    @@index([status])
+    @@index([socialAccountExternalId, status])
     @@map("comments")
 }
